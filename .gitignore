@@ -1,0 +1,25 @@
+# Internal development files
+.ai/
+.vscode/
+
+# System files
+.DS_Store
+
+# Dependencies and build artifacts
+node_modules/
+dist/
+examples/dist/
+
+# Environment and secrets
+.env
+
+# Test coverage
+coverage/
+
+# Internal wiki (keep private for now)
+wiki/
+docs/
+
+# Temporary files
+*.tmp
+*.log
