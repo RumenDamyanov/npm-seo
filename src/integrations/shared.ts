@@ -62,9 +62,10 @@ export function formatApiResponse<T>(
  */
 export function extractTextFromHtml(html: string): string {
   // Use sanitize-html to reliably remove all HTML tags and extract text content
-  return sanitizeHtml(html, {
+  const cleanHtml = sanitizeHtml(html, {
     allowedTags: [],
     allowedAttributes: {},
-    textFilter: (text) => text.replace(/\s+/g, ' ')
-  }).trim();
+    textFilter: (text: string) => text.replace(/\s+/g, ' '),
+  });
+  return cleanHtml.trim();
 }
