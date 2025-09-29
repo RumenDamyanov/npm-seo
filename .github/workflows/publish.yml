@@ -1,0 +1,61 @@
+name: Publish to NPM
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    name: Publish Package
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      id-token: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run full CI pipeline
+        run: |
+          npm run lint:check
+          npm run format:check
+          npm run typecheck
+          npm run test:ci
+          npm run build
+
+      - name: Verify package can be packed
+        run: npm pack --dry-run
+
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create and Upload Release Assets
+        run: |
+          npm pack
+          PACKAGE_FILE=$(ls *.tgz)
+          ASSET_NAME="${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.tgz"
+          mv "$PACKAGE_FILE" "$ASSET_NAME"
+          echo "Uploading release asset: $ASSET_NAME"
+          gh release upload ${{ github.event.release.tag_name }} "$ASSET_NAME" --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Package Version Badge
+        run: |
+          echo "Package published successfully!"
+          echo "Version: ${{ github.event.release.tag_name }}"
+          echo "Package: @rumenx/seo"

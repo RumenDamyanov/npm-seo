@@ -298,7 +298,7 @@ describe('SeoManager', () => {
       seoManager = new SeoManager(config);
     });
 
-    it('should throw error when AI provider not configured for generateSuggestions', () => {
+    it('should throw error when AI provider not configured for generateSuggestions', async () => {
       const mockAnalysis = {
         wordCount: 100,
         language: 'en',
@@ -312,7 +312,7 @@ describe('SeoManager', () => {
       );
     });
 
-    it('should handle AI generation with proper provider', () => {
+    it('should handle AI generation with proper provider', async () => {
       // Mock AI provider
       const mockAiProvider = {
         generate: jest.fn().mockResolvedValue({
@@ -337,7 +337,7 @@ describe('SeoManager', () => {
       expect(result).toEqual(expect.any(Array));
     });
 
-    it('should handle AI generation errors and return fallback suggestions', () => {
+    it('should handle AI generation errors and return fallback suggestions', async () => {
       // Mock AI provider that throws an error
       const mockAiProvider = {
         generate: jest.fn().mockRejectedValue(new Error('AI service error')),
@@ -359,7 +359,7 @@ describe('SeoManager', () => {
       expect(result).toEqual(expect.any(Array));
     });
 
-    it('should generate different types of AI suggestions', () => {
+    it('should generate different types of AI suggestions', async () => {
       const mockAiProvider = {
         generate: jest.fn().mockResolvedValue({
           content: 'Generated suggestion 1\nGenerated suggestion 2',

@@ -1,0 +1,84 @@
+version: 2
+
+updates:
+  # Enable version updates for npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "RumenDamyanov"
+    assignees:
+      - "RumenDamyanov"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Group development dependencies together
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier*"
+          - "jest*"
+          - "typescript*"
+          - "@typescript-eslint/*"
+      testing-dependencies:
+        patterns:
+          - "jest*"
+          - "@jest/*"
+          - "ts-jest"
+          - "supertest"
+    # Auto-merge minor and patch updates for development dependencies
+    ignore:
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+    # Allow specific version updates
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+      - dependency-type: "development"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "RumenDamyanov"
+    assignees:
+      - "RumenDamyanov"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    # Group GitHub Actions updates
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "github/*"
+
+  # Enable version updates for Docker (if you add Dockerfile in the future)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "11:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "RumenDamyanov"
+    commit-message:
+      prefix: "docker"
+      include: "scope"

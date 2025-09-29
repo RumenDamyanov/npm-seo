@@ -1,7 +1,7 @@
 # @rumenx/seo
 
 [![npm version](https://badge.fury.io/js/@rumenx%2Fseo.svg)](https://badge.fury.io/js/@rumenx%2Fseo)
-[![CI](https://github.com/RumenDamyanov/npm-seo/workflows/CI/badge.svg)](https://github.com/RumenDamyanov/npm-seo/actions)
+[![Node.js CI](https://github.com/RumenDamyanov/npm-seo/actions/workflows/ci.yml/badge.svg)](https://github.com/RumenDamyanov/npm-seo/actions)
 [![codecov](https://codecov.io/gh/RumenDamyanov/npm-seo/branch/master/graph/badge.svg)](https://codecov.io/gh/RumenDamyanov/npm-seo)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

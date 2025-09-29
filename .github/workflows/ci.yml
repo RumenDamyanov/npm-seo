@@ -1,0 +1,97 @@
+name: Node.js CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v5
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci --prefer-offline
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run type checking
+      run: npm run typecheck
+
+    - name: Run tests with coverage
+      run: npm run test:coverage
+
+    - name: Upload coverage reports to Codecov
+      if: matrix.node-version == '20.x'
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v5
+      with:
+        node-version: 20.x
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci --prefer-offline
+
+    - name: Build package
+      run: npm run build
+
+    - name: Test package installation
+      run: npm pack --dry-run
+
+  quality:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v5
+      with:
+        node-version: 20.x
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci --prefer-offline
+
+    - name: Check formatting
+      run: npm run format:check
+
+    - name: Run prepublishOnly script
+      run: npm run prepublishOnly
