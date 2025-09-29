@@ -195,7 +195,7 @@ describe('PerformanceBenchmark', () => {
   describe('measureThroughput', () => {
     it('should measure throughput for operations', async () => {
       const testFn = (): void => {
-        Math.random() * 1000; // Don't return
+        void (Math.random() * 1000); // Don't return, use void to indicate intentional unused expression
       };
 
       const result = await measureThroughput(testFn, 100); // 100ms test
@@ -341,7 +341,7 @@ describe('PerformanceBenchmark', () => {
   describe('stressTest', () => {
     it('should run stress test with concurrent operations', async () => {
       const testFn = (): void => {
-        Math.random() * 100; // Don't return
+        void (Math.random() * 100); // Don't return, use void to indicate intentional unused expression
       };
 
       const result = await stressTest(testFn, {
@@ -400,7 +400,7 @@ describe('PerformanceBenchmark', () => {
     it('should handle async non-Error exceptions', async () => {
       // eslint-disable-next-line @typescript-eslint/require-await
       const testFn = async (): Promise<void> => {
-        throw 'Async string error';
+        throw new Error('Async string error');
       };
 
       const result = await stressTest(testFn, {
