@@ -3,7 +3,7 @@
  */
 
 import type { SeoConfig } from '../types/SeoTypes';
-
+import sanitizeHtml from 'sanitize-html';
 /**
  * Common utility functions for framework integrations
  */
@@ -61,11 +61,10 @@ export function formatApiResponse<T>(
  * Extract content from HTML string
  */
 export function extractTextFromHtml(html: string): string {
-  // Basic HTML tag removal - in production, use a proper HTML parser
-  return html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Use sanitize-html to reliably remove all HTML tags and extract text content
+  return sanitizeHtml(html, {
+    allowedTags: [],
+    allowedAttributes: {},
+    textFilter: (text) => text.replace(/\s+/g, ' ')
+  }).trim();
 }
