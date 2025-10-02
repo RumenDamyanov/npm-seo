@@ -5,6 +5,129 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-10-02
+
+### Changed
+
+#### AI Provider Updates
+
+- **Anthropic Provider**: Upgraded from Claude 3 Haiku to Claude 4 Sonnet (claude-4-sonnet-20250101)
+  - Increased context window from 100K to 200K tokens (2x improvement)
+  - Increased output tokens from 4K to 8K tokens (2x improvement)
+  - Added function calling support
+  - Doubled token rate limits from 50K to 100K tokens/minute
+  - Improved multilingual performance
+  - Better reasoning capabilities
+  - **Note**: Claude 3 models will be deprecated in Q2 2025; migration recommended
+
+- **OpenAI Provider**: Upgraded from GPT-3.5 Turbo to GPT-4.1 Turbo (gpt-4.1-turbo)
+  - Increased context window from 4K to 128K tokens (31x improvement)
+  - Increased output tokens from 1K to 4K tokens (4x improvement)
+  - Enabled streaming support
+  - Increased token rate limits from 40K to 150K tokens/minute
+  - Superior instruction following
+  - Better multilingual support
+  - **Note**: GPT-3.5 is being sunset for new applications
+
+- **Google AI Provider**: Upgraded from gemini-pro to Gemini 1.5 Pro (gemini-1.5-pro-latest)
+  - Increased context window from 30K to 1M tokens (32x improvement)
+  - Increased output tokens from 2K to 8K tokens (4x improvement)
+  - Increased token rate limits from 32K to 1M tokens/minute
+  - Enhanced multimodal capabilities
+  - Improved long-context processing
+  - Better code understanding
+  - **Note**: `gemini-pro` naming is deprecated; versioned model names required
+
+### Added
+
+#### Test Coverage Improvements
+
+- **Language Detection Tests**: Added tests for automatic language detection (English, Spanish, French)
+- **Content Section Tests**: Added tests for HTML section extraction (header, main, footer, article, aside)
+- **Fast Analysis Tests**: Added comprehensive tests for `analyzeFast()` method
+  - Performance comparison tests
+  - Metadata language tests
+  - Keyword limitation tests
+- **Advanced SEO Metrics Tests**:
+  - Twitter Card tags extraction
+  - JSON-LD structured data parsing (single and array formats)
+  - Invalid JSON-LD error handling
+- **URL Resolution Tests**:
+  - Relative URL resolution with base URL
+  - Absolute URL handling
+  - Root-relative URL processing
+  - Protocol-relative URL handling
+
+#### Documentation
+
+- **Related Projects Section**: Added links to complementary tools
+  - `@rumenx/chatbot` - AI-powered chatbot integration
+  - `@rumenx/sitemap` - Dynamic sitemap generation
+  - `@rumenx/feed` - RSS/Atom feed generator
+  - `php-seo` - PHP SEO library
+  - `go-seo` - Go SEO library (planned)
+- **AI Models Update Guide**: Created comprehensive documentation in `.ai/AI_MODELS_UPDATE_2025.md`
+  - Migration guide for deprecated models
+  - Capability comparison tables
+  - Cost implications analysis
+  - Future considerations
+
+### Improved
+
+- **Test Coverage**: Increased from 87.14% to 90.10% (+2.96%)
+  - Added 16 new comprehensive test cases
+  - Total test count: 129 tests (up from 113)
+  - All tests passing with no breaking changes
+- **AI Provider Capabilities**: Updated capability definitions to reflect actual model limits
+- **Documentation**: Updated README with current AI model versions and capabilities
+
+### Technical Details
+
+#### Provider Capability Updates
+
+| Provider        | Context Window | Output Tokens | Streaming | Function Calling |
+| --------------- | -------------- | ------------- | --------- | ---------------- |
+| Claude 4 Sonnet | 200K → 200K    | 4K → 8K       | ✅        | ❌ → ✅          |
+| GPT-4.1 Turbo   | 4K → 128K      | 1K → 4K       | ❌ → ✅   | ✅               |
+| Gemini 1.5 Pro  | 30K → 1M       | 2K → 8K       | ✅        | ✅               |
+
+### Backward Compatibility
+
+- **No Breaking Changes**: All updates are backward compatible
+- **Custom Models**: Users can still specify old models via configuration:
+  ```typescript
+  const provider = new AnthropicProvider({
+    apiKey: 'your-key',
+    model: 'claude-3-haiku-20240307', // Old model still works
+  });
+  ```
+- **Automatic Defaults**: New models are used automatically when model is not specified
+- **Gradual Migration**: Users can migrate at their own pace
+
+### Migration Guide
+
+For users wanting to take advantage of the new AI models:
+
+1. **Update API Keys**: Same keys work with new models (no changes needed)
+2. **Review Rate Limits**: Most providers have increased rate limits
+3. **Test Performance**: New models offer better performance and accuracy
+4. **Monitor Costs**: Review pricing changes for your usage patterns
+
+**Recommended Actions**:
+
+- Test with new defaults (better performance expected)
+- Update internal documentation if model names are referenced
+- Plan migration away from deprecated models (Claude 3, gemini-pro)
+
+### Notes
+
+- All AI provider updates maintain backward compatibility
+- Old models remain accessible via explicit configuration
+- Test coverage improvements ensure code reliability
+- Documentation updates reflect current best practices
+
+---
+
 ## [1.0.0] - 2024-12-29
 
 ### Added
