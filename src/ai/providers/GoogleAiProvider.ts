@@ -13,15 +13,15 @@ import type {
 export class GoogleAiProvider extends BaseAiProvider {
   public readonly name = 'google';
   public readonly capabilities: AiProviderCapabilities = {
-    maxInputTokens: 30720,
-    maxOutputTokens: 2048,
+    maxInputTokens: 1000000,
+    maxOutputTokens: 8192,
     supportedLanguages: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'],
     supportsImageAnalysis: true,
     supportsStreaming: true,
     supportsFunctionCalling: true,
     rateLimits: {
       requestsPerMinute: 60,
-      tokensPerMinute: 32000,
+      tokensPerMinute: 1000000,
       requestsPerDay: 1500,
     },
   };
@@ -34,9 +34,11 @@ export class GoogleAiProvider extends BaseAiProvider {
 
   /**
    * Get the model name for this provider
+   * Updated to Gemini 1.5 Pro (latest stable) - massive context window
+   * Alternatives: gemini-1.5-flash (faster), gemini-2.0-flash-exp (experimental)
    */
   protected getModelName(): string {
-    return this.config.model ?? 'gemini-pro';
+    return this.config.model ?? 'gemini-1.5-pro-latest';
   }
 
   /**

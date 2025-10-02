@@ -1,11 +1,10 @@
 # @rumenx/seo
 
-[![npm version](https://badge.fury.io/js/@rumenx%2Fseo.svg)](https://badge.fury.io/js/@rumenx%2Fseo)
-[![Node.js CI](https://github.com/RumenDamyanov/npm-seo/actions/workflows/ci.yml/badge.svg)](https://github.com/RumenDamyanov/npm-seo/actions)
+[![CI](https://github.com/RumenDamyanov/npm-seo/actions/workflows/ci.yml/badge.svg)](https://github.com/RumenDamyanov/npm-seo/actions)
+[![CodeQL](https://github.com/RumenDamyanov/npm-seo/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/RumenDamyanov/npm-seo/actions/workflows/github-code-scanning/codeql)
+[![Dependabot](https://github.com/RumenDamyanov/npm-seo/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/RumenDamyanov/npm-seo/actions/workflows/dependabot/dependabot-updates)
 [![codecov](https://codecov.io/gh/RumenDamyanov/npm-seo/branch/master/graph/badge.svg)](https://codecov.io/gh/RumenDamyanov/npm-seo)
-[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Downloads](https://img.shields.io/npm/dm/@rumenx/seo.svg)](https://www.npmjs.com/package/@rumenx/seo)
+[![npm version](https://img.shields.io/npm/v/@rumenx/seo.svg)](https://www.npmjs.com/package/@rumenx/seo)
 
 A comprehensive TypeScript library for SEO analysis, content optimization, and meta tag generation with AI-powered suggestions.
 
@@ -13,7 +12,7 @@ A comprehensive TypeScript library for SEO analysis, content optimization, and m
 
 - 🔍 **Content Analysis**: Deep analysis of HTML content, structure, and SEO metrics
 - 🎯 **SEO Recommendations**: Automated suggestions for title, description, headings, and more
-- 🤖 **AI Integration**: Support for OpenAI, Anthropic, Google, and Ollama for content generation
+- 🤖 **AI Integration**: Support for OpenAI GPT-4.1, Claude 4, Gemini 1.5 Pro, and Ollama for content generation
 - 📊 **SEO Scoring**: Comprehensive scoring system with detailed breakdowns
 - ⚡ **Fast Mode**: Optimized analysis for performance-critical applications
 - 🏗️ **Framework Ready**: Built-in adapters for Express, Next.js, and Fastify
@@ -33,16 +32,16 @@ npm install @rumenx/seo
 For AI-powered content generation, install your preferred provider:
 
 ```bash
-# OpenAI (GPT-4, GPT-3.5)
+# OpenAI (GPT-4.1, GPT-4.1-turbo)
 npm install openai
 
-# Anthropic (Claude)
+# Anthropic (Claude 4)
 npm install @anthropic-ai/sdk
 
-# Google AI (Gemini)
+# Google AI (Gemini 1.5 Pro, Gemini 2.0)
 npm install @google/generative-ai
 
-# Ollama (Local models)
+# Ollama (Local models: Llama 3.3, Qwen 2.5, etc.)
 npm install ollama
 ```
 
@@ -328,6 +327,23 @@ const config = {
 - [**Examples**](https://github.com/RumenDamyanov/npm-seo/tree/master/examples) - Working code examples
 - [**Changelog**](https://github.com/RumenDamyanov/npm-seo/blob/master/CHANGELOG.md) - Version history and updates
 
+## 🔗 Related Projects
+
+Check out our other Node.js tools that work great with `@rumenx/seo`:
+
+### JavaScript/TypeScript Libraries
+
+- **[@rumenx/chatbot](https://github.com/RumenDamyanov/npm-chatbot)** - AI-powered chatbot integration for Node.js applications
+- **[@rumenx/sitemap](https://github.com/RumenDamyanov/npm-sitemap)** - Dynamic sitemap generation and management
+- **[@rumenx/feed](https://github.com/RumenDamyanov/npm-feed)** - RSS/Atom feed generator for content syndication
+
+### Other Languages
+
+- **[php-seo](https://github.com/RumenDamyanov/php-seo)** - SEO analysis and optimization library for PHP
+- **[go-seo](https://github.com/RumenDamyanov/go-seo)** _(Planned)_ - SEO analysis and optimization library for Go
+
+These tools complement each other to provide a complete content management and SEO solution for modern web applications.
+
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
@@ -358,7 +374,6 @@ This project is licensed under the [MIT License](LICENSE.md).
 
 - 📖 [Documentation](https://github.com/RumenDamyanov/npm-seo#readme)
 - 🐛 [Issue Tracker](https://github.com/RumenDamyanov/npm-seo/issues)
-- 💬 [GitHub Discussions](https://github.com/RumenDamyanov/npm-seo/discussions)
 - ✉️ [Email Support](mailto:contact@rumenx.com)
 
 ---

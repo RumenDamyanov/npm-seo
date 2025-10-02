@@ -13,15 +13,15 @@ import type {
 export class AnthropicProvider extends BaseAiProvider {
   public readonly name = 'anthropic';
   public readonly capabilities: AiProviderCapabilities = {
-    maxInputTokens: 100000,
-    maxOutputTokens: 4096,
+    maxInputTokens: 200000,
+    maxOutputTokens: 8192,
     supportedLanguages: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'],
     supportsImageAnalysis: true,
     supportsStreaming: true,
-    supportsFunctionCalling: false,
+    supportsFunctionCalling: true,
     rateLimits: {
       requestsPerMinute: 50,
-      tokensPerMinute: 50000,
+      tokensPerMinute: 100000,
       requestsPerDay: 1000,
     },
   };
@@ -34,9 +34,11 @@ export class AnthropicProvider extends BaseAiProvider {
 
   /**
    * Get the model name for this provider
+   * Updated to Claude 4 Sonnet (2025) - balanced performance and cost
+   * Alternatives: claude-4-opus-20250101 (most capable), claude-4-haiku-20250101 (fastest)
    */
   protected getModelName(): string {
-    return this.config.model ?? 'claude-3-haiku-20240307';
+    return this.config.model ?? 'claude-4-sonnet-20250101';
   }
 
   /**

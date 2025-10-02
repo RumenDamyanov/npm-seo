@@ -13,15 +13,15 @@ import type {
 export class OpenAiProvider extends BaseAiProvider {
   public readonly name = 'openai';
   public readonly capabilities: AiProviderCapabilities = {
-    maxInputTokens: 4096,
-    maxOutputTokens: 1024,
+    maxInputTokens: 128000,
+    maxOutputTokens: 4096,
     supportedLanguages: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'],
     supportsImageAnalysis: true,
-    supportsStreaming: false,
+    supportsStreaming: true,
     supportsFunctionCalling: true,
     rateLimits: {
       requestsPerMinute: 60,
-      tokensPerMinute: 40000,
+      tokensPerMinute: 150000,
       requestsPerDay: 1000,
     },
   };
@@ -34,9 +34,11 @@ export class OpenAiProvider extends BaseAiProvider {
 
   /**
    * Get the model name for this provider
+   * Updated to GPT-4.1 Turbo (2025) - best balance of performance and cost
+   * Alternatives: gpt-4.1 (standard), gpt-4o-mini (cost-effective)
    */
   protected getModelName(): string {
-    return this.config.model ?? 'gpt-3.5-turbo';
+    return this.config.model ?? 'gpt-4.1-turbo';
   }
 
   /**

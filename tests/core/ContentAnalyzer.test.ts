@@ -115,5 +115,95 @@ describe('ContentAnalyzer', () => {
       expect(result.textContent).toBeDefined();
       expect(result.seoMetrics.titleTag).toBe('Test');
     });
+
+    it('should detect language from content', () => {
+      const englishContent = `
+        <html><body>
+          <p>The quick brown fox jumps over the lazy dog. This is a test with many English words and phrases.</p>
+          <p>We are testing the language detection feature with sufficient content to ensure accuracy.</p>
+        </body></html>
+      `;
+      const result = analyzer.analyze(englishContent);
+      expect(result.language).toBe('en');
+    });
+
+    it('should detect Spanish language', () => {
+      const spanishContent = `
+        <html><body>
+          <p>El rápido zorro marrón salta sobre el perro perezoso. Esta es una prueba con muchas palabras en español.</p>
+          <p>Estamos probando la detección de idioma con contenido suficiente para garantizar la precisión.</p>
+        </body></html>
+      `;
+      const result = analyzer.analyze(spanishContent);
+      expect(result.language).toBe('es');
+    });
+
+    it('should use provided metadata language when detection fails', () => {
+      const shortContent = '<html><body><p>Hi</p></body></html>';
+      const result = analyzer.analyze(shortContent, { language: 'fr' });
+      expect(result.language).toBe('fr');
+    });
+
+    it('should extract content sections', () => {
+      const sectionalContent = `
+        <html><body>
+          <header><p>This is the header section with some content</p></header>
+          <main><p>This is the main content area with important information</p></main>
+          <footer><p>This is the footer with additional details</p></footer>
+        </body></html>
+      `;
+      const result = analyzer.analyze(sectionalContent);
+      expect(result.structure.sections).toBeDefined();
+      expect(result.structure.sections.length).toBeGreaterThan(0);
+      const sectionTypes = result.structure.sections.map(s => s.type);
+      expect(sectionTypes).toContain('header');
+      expect(sectionTypes).toContain('main');
+      expect(sectionTypes).toContain('footer');
+    });
+  });
+
+  describe('analyzeFast', () => {
+    it('should perform fast analysis with minimal processing', () => {
+      const result = analyzer.analyzeFast(mockHtmlContent);
+
+      expect(result).toBeDefined();
+      expect(result.meta.mode).toBe('fast');
+      expect(result.textContent).toBeDefined();
+      expect(result.wordCount).toBeGreaterThan(0);
+      expect(result.keywords).toBeDefined();
+    });
+
+    it('should skip detailed metrics in fast mode', () => {
+      const result = analyzer.analyzeFast(mockHtmlContent);
+
+      expect(result.sentenceCount).toBe(0);
+      expect(result.paragraphCount).toBe(0);
+      expect(result.structure.images).toEqual([]);
+      expect(result.structure.links).toEqual([]);
+      expect(result.structure.sections).toEqual([]);
+    });
+
+    it('should be faster than full analysis', () => {
+      const startFull = Date.now();
+      analyzer.analyze(mockHtmlContent);
+      const fullTime = Date.now() - startFull;
+
+      const startFast = Date.now();
+      analyzer.analyzeFast(mockHtmlContent);
+      const fastTime = Date.now() - startFast;
+
+      // Fast mode should generally be faster or similar
+      expect(fastTime).toBeLessThanOrEqual(fullTime + 5); // Allow 5ms margin
+    });
+
+    it('should use provided metadata language in fast mode', () => {
+      const result = analyzer.analyzeFast(mockHtmlContent, { language: 'de' });
+      expect(result.language).toBe('de');
+    });
+
+    it('should limit keywords in fast mode', () => {
+      const result = analyzer.analyzeFast(mockHtmlContent);
+      expect(result.keywords.length).toBeLessThanOrEqual(10);
+    });
   });
 });

@@ -238,4 +238,134 @@ describe('HtmlParser Utils', () => {
       expect(extractLinks(whitespaceHtml)).toEqual([]);
     });
   });
+
+  describe('advanced SEO metrics', () => {
+    it('should extract Twitter Card tags', () => {
+      const htmlWithTwitter = `
+        <html>
+          <head>
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:site" content="@testsite">
+            <meta name="twitter:title" content="Test Twitter Title">
+          </head>
+          <body><p>Content</p></body>
+        </html>
+      `;
+      const metrics = extractSeoMetrics(htmlWithTwitter);
+      expect(metrics.twitterCardTags).toBeDefined();
+      expect(metrics.twitterCardTags['twitter:card']).toBe('summary_large_image');
+      expect(metrics.twitterCardTags['twitter:site']).toBe('@testsite');
+      expect(metrics.twitterCardTags['twitter:title']).toBe('Test Twitter Title');
+    });
+
+    it('should extract JSON-LD structured data', () => {
+      const htmlWithJsonLd = `
+        <html>
+          <head>
+            <script type="application/ld+json">
+              {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": "Test Article"
+              }
+            </script>
+          </head>
+          <body><p>Content</p></body>
+        </html>
+      `;
+      const metrics = extractSeoMetrics(htmlWithJsonLd);
+      expect(metrics.structuredData).toBeDefined();
+      expect(Array.isArray(metrics.structuredData)).toBe(true);
+      expect(metrics.structuredData.length).toBeGreaterThan(0);
+    });
+
+    it('should handle array of JSON-LD structured data', () => {
+      const htmlWithJsonLdArray = `
+        <html>
+          <head>
+            <script type="application/ld+json">
+              [
+                {"@type": "Organization", "name": "Test Org"},
+                {"@type": "WebSite", "name": "Test Site"}
+              ]
+            </script>
+          </head>
+          <body><p>Content</p></body>
+        </html>
+      `;
+      const metrics = extractSeoMetrics(htmlWithJsonLdArray);
+      expect(metrics.structuredData).toBeDefined();
+      expect(metrics.structuredData.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should handle invalid JSON-LD gracefully', () => {
+      const htmlWithInvalidJsonLd = `
+        <html>
+          <head>
+            <script type="application/ld+json">
+              { invalid json here }
+            </script>
+          </head>
+          <body><p>Content</p></body>
+        </html>
+      `;
+      expect(() => extractSeoMetrics(htmlWithInvalidJsonLd)).not.toThrow();
+      const metrics = extractSeoMetrics(htmlWithInvalidJsonLd);
+      expect(metrics.structuredData).toEqual([]);
+    });
+  });
+
+  describe('URL resolution with base URL', () => {
+    const baseUrl = 'https://example.com/blog/';
+
+    it('should resolve relative URLs with base URL', () => {
+      const htmlWithRelativeLinks = `
+        <html>
+          <body>
+            <a href="post1.html">Post 1</a>
+            <a href="/about">About</a>
+            <img src="image.jpg">
+          </body>
+        </html>
+      `;
+      const links = extractLinks(htmlWithRelativeLinks, baseUrl);
+      expect(links[0].url).toBe('https://example.com/blog/post1.html');
+      expect(links[1].url).toBe('https://example.com/about');
+
+      const images = extractImages(htmlWithRelativeLinks, baseUrl);
+      expect(images[0].url).toBe('https://example.com/blog/image.jpg');
+    });
+
+    it('should not modify absolute URLs', () => {
+      const htmlWithAbsoluteLinks = `
+        <html>
+          <body>
+            <a href="https://other.com/page">External</a>
+            <a href="http://other.com/page">HTTP External</a>
+            <a href="//cdn.com/resource">Protocol Relative</a>
+          </body>
+        </html>
+      `;
+      const links = extractLinks(htmlWithAbsoluteLinks, baseUrl);
+      expect(links[0].url).toBe('https://other.com/page');
+      expect(links[1].url).toBe('http://other.com/page');
+      expect(links[2].url).toBe('//cdn.com/resource');
+    });
+
+    it('should handle root-relative URLs', () => {
+      const htmlWithRootRelative = `
+        <html>
+          <body>
+            <a href="/contact">Contact</a>
+            <img src="/images/logo.png">
+          </body>
+        </html>
+      `;
+      const links = extractLinks(htmlWithRootRelative, baseUrl);
+      expect(links[0].url).toBe('https://example.com/contact');
+
+      const images = extractImages(htmlWithRootRelative, baseUrl);
+      expect(images[0].url).toBe('https://example.com/images/logo.png');
+    });
+  });
 });
