@@ -115,7 +115,7 @@ export class AiSeoAnalyzer {
     }
 
     // Structure - check if we have headings
-    if (!contentAnalysis.structure.headings || contentAnalysis.structure.headings.length === 0) {
+    if (contentAnalysis.structure.headings?.length === 0) {
       focusAreas.push('structure');
     }
 
