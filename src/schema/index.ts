@@ -1,6 +1,6 @@
 /**
  * Schema.org structured data classes for @rumenx/seo
- * 
+ *
  * Provides fluent interfaces for creating JSON-LD structured data
  */
 
@@ -11,4 +11,3 @@ export { BaseSchema } from './BaseSchema';
 export { ArticleSchema } from './ArticleSchema';
 export { BreadcrumbListSchema } from './BreadcrumbListSchema';
 export { ProductSchema } from './ProductSchema';
-

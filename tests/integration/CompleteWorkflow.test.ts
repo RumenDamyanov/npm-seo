@@ -228,10 +228,7 @@ describe('Complete SEO Workflow Integration', () => {
       expect(analysis!.keywords).toBeDefined();
 
       // Generate suggestions with AI
-      const suggestions = await seoManager.generateSuggestions(
-        analysis!,
-        'title'
-      );
+      const suggestions = await seoManager.generateSuggestions(analysis!, 'title');
 
       expect(suggestions).toBeDefined();
       expect(Array.isArray(suggestions)).toBe(true);
@@ -275,9 +272,7 @@ describe('Complete SEO Workflow Integration', () => {
       // Generate audit report
       const auditReport = {
         totalPages: results.length,
-        averageScore:
-          results.reduce((sum, r) => sum + r.result.score.overall, 0) /
-          results.length,
+        averageScore: results.reduce((sum, r) => sum + r.result.score.overall, 0) / results.length,
         issues: results.flatMap(r => r.result.recommendations),
         pageScores: results.map(r => ({
           id: r.id,
@@ -302,10 +297,7 @@ describe('Complete SEO Workflow Integration', () => {
       const content = '<h1>Fluent Test</h1><p>Testing method chaining</p>';
 
       // Chain analyze and generate
-      const result = seoManager
-        .updateConfig({ mode: 'fast' })
-        .analyze(content)
-        .generateAll();
+      const result = seoManager.updateConfig({ mode: 'fast' }).analyze(content).generateAll();
 
       expect(result.title).toBeDefined();
       expect(result.description).toBeDefined();
@@ -328,4 +320,3 @@ describe('Complete SEO Workflow Integration', () => {
     });
   });
 });
-

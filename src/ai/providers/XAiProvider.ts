@@ -18,10 +18,10 @@ try {
 
 /**
  * xAI provider implementation for Grok models
- * 
+ *
  * xAI uses an OpenAI-compatible API, so we use the OpenAI SDK
  * with a custom base URL
- * 
+ *
  * @example
  * ```typescript
  * // Real API mode
@@ -29,7 +29,7 @@ try {
  *   apiKey: process.env.XAI_API_KEY,
  *   model: 'grok-2-latest',
  * });
- * 
+ *
  * // Mock mode (for testing)
  * const provider = new XAiProvider({
  *   apiKey: 'mock-key',
@@ -52,7 +52,7 @@ export class XAiProvider extends BaseAiProvider {
       requestsPerDay: 1000,
     },
   };
-  
+
   private config: XAiConfig;
   private client: any | null = null;
   private mockMode: boolean;
@@ -61,7 +61,7 @@ export class XAiProvider extends BaseAiProvider {
     super();
     this.config = config;
     this.mockMode = (config as any).mockMode === true || !OpenAI || !config.apiKey;
-    
+
     // Initialize xAI client (using OpenAI SDK with custom base URL)
     if (!this.mockMode && OpenAI) {
       try {
@@ -99,11 +99,11 @@ export class XAiProvider extends BaseAiProvider {
     if (this.mockMode) {
       return true; // Mock mode is always available
     }
-    
+
     if (!this.client) {
       return false;
     }
-    
+
     try {
       // Test API by listing models
       await this.client.models.list();
@@ -115,12 +115,12 @@ export class XAiProvider extends BaseAiProvider {
 
   /**
    * Generate content using xAI Grok
-   * 
+   *
    * Automatically uses mock mode if:
    * - OpenAI SDK not installed
    * - No API key provided
    * - mockMode explicitly enabled
-   * 
+   *
    * @throws {Error} If API call fails (not in mock mode)
    */
   async generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
@@ -138,7 +138,8 @@ export class XAiProvider extends BaseAiProvider {
         messages: [
           {
             role: 'system',
-            content: 'You are Grok, an AI assistant by xAI. You are helpful, witty, and provide excellent SEO advice.',
+            content:
+              'You are Grok, an AI assistant by xAI. You are helpful, witty, and provide excellent SEO advice.',
           },
           {
             role: 'user',
@@ -178,7 +179,7 @@ export class XAiProvider extends BaseAiProvider {
       } else if (error.status === 500 || error.status === 503) {
         throw new Error('xAI service is temporarily unavailable');
       }
-      
+
       throw new Error(`xAI API error: ${error.message || 'Unknown error'}`);
     }
   }
@@ -187,10 +188,7 @@ export class XAiProvider extends BaseAiProvider {
    * Generate mock response for testing
    * @private
    */
-  private generateMock(
-    request: AiGenerationRequest,
-    startTime: number
-  ): AiGenerationResponse {
+  private generateMock(request: AiGenerationRequest, startTime: number): AiGenerationResponse {
     const content = this.generateMockResponse(request);
     const processingTime = Date.now() - startTime;
     const alternatives = this.extractAlternatives(content);
@@ -227,7 +225,7 @@ export class XAiProvider extends BaseAiProvider {
     };
   }> {
     const available = await this.isAvailable();
-    
+
     return {
       available,
       model: this.getModelName(),
@@ -243,10 +241,10 @@ export class XAiProvider extends BaseAiProvider {
   private generateMockResponse(request: AiGenerationRequest): string {
     // Generate appropriate mock content based on prompt
     if (request.prompt.includes('title')) {
-      return 'Grok\'s Guide to SEO: Witty Strategies for Search Domination';
+      return "Grok's Guide to SEO: Witty Strategies for Search Domination";
     }
     if (request.prompt.includes('description')) {
-      return 'Discover Grok\'s unique take on SEO optimization. Learn witty, effective strategies that actually work for improving your search engine rankings.';
+      return "Discover Grok's unique take on SEO optimization. Learn witty, effective strategies that actually work for improving your search engine rankings.";
     }
     if (request.prompt.includes('keywords')) {
       return 'SEO strategies, search domination, Grok AI, witty optimization, search rankings, xAI';
@@ -286,4 +284,3 @@ export class XAiProvider extends BaseAiProvider {
     return undefined;
   }
 }
-

@@ -17,9 +17,9 @@ try {
 
 /**
  * OpenAI provider implementation with real API integration
- * 
+ *
  * Supports both real API calls and mock mode for testing
- * 
+ *
  * @example
  * ```typescript
  * // Real API mode
@@ -27,7 +27,7 @@ try {
  *   apiKey: process.env.OPENAI_API_KEY,
  *   model: 'gpt-4.1-turbo',
  * });
- * 
+ *
  * // Mock mode (for testing)
  * const provider = new OpenAiProvider({
  *   apiKey: 'mock-key',
@@ -50,7 +50,7 @@ export class OpenAiProvider extends BaseAiProvider {
       requestsPerDay: 1000,
     },
   };
-  
+
   private config: OpenAiConfig;
   private client: any | null = null;
   private mockMode: boolean;
@@ -59,7 +59,7 @@ export class OpenAiProvider extends BaseAiProvider {
     super();
     this.config = config;
     this.mockMode = (config as any).mockMode === true || !OpenAI || !config.apiKey;
-    
+
     // Initialize OpenAI client if not in mock mode
     if (!this.mockMode && OpenAI) {
       try {
@@ -90,11 +90,11 @@ export class OpenAiProvider extends BaseAiProvider {
     if (this.mockMode) {
       return true; // Mock mode is always available
     }
-    
+
     if (!this.client) {
       return false;
     }
-    
+
     try {
       // Test API by listing models
       await this.client.models.list();
@@ -106,12 +106,12 @@ export class OpenAiProvider extends BaseAiProvider {
 
   /**
    * Generate content using OpenAI
-   * 
+   *
    * Automatically uses mock mode if:
    * - OpenAI SDK not installed
    * - No API key provided
    * - mockMode explicitly enabled
-   * 
+   *
    * @throws {Error} If API call fails (not in mock mode)
    */
   async generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
@@ -169,7 +169,7 @@ export class OpenAiProvider extends BaseAiProvider {
       } else if (error.status === 500 || error.status === 503) {
         throw new Error('OpenAI service is temporarily unavailable');
       }
-      
+
       throw new Error(`OpenAI API error: ${error.message || 'Unknown error'}`);
     }
   }
@@ -178,10 +178,7 @@ export class OpenAiProvider extends BaseAiProvider {
    * Generate mock response for testing
    * @private
    */
-  private generateMock(
-    request: AiGenerationRequest,
-    startTime: number
-  ): AiGenerationResponse {
+  private generateMock(request: AiGenerationRequest, startTime: number): AiGenerationResponse {
     const content = this.generateMockResponse(request);
     const processingTime = Date.now() - startTime;
     const alternatives = this.extractAlternatives(content);
@@ -225,7 +222,7 @@ export class OpenAiProvider extends BaseAiProvider {
     };
   }> {
     const available = await this.isAvailable();
-    
+
     return {
       available,
       model: this.getModelName(),

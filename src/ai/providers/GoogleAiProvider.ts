@@ -18,9 +18,9 @@ try {
 
 /**
  * Google AI provider implementation with real Gemini API integration
- * 
+ *
  * Supports Gemini 1.5 Pro and other models with real API calls and mock mode for testing
- * 
+ *
  * @example
  * ```typescript
  * // Real API mode
@@ -28,7 +28,7 @@ try {
  *   apiKey: process.env.GOOGLE_AI_API_KEY,
  *   model: 'gemini-1.5-pro-latest',
  * });
- * 
+ *
  * // Mock mode (for testing)
  * const provider = new GoogleAiProvider({
  *   apiKey: 'mock-key',
@@ -51,7 +51,7 @@ export class GoogleAiProvider extends BaseAiProvider {
       requestsPerDay: 1500,
     },
   };
-  
+
   private config: GoogleAiConfig;
   private client: any | null = null;
   private mockMode: boolean;
@@ -60,7 +60,7 @@ export class GoogleAiProvider extends BaseAiProvider {
     super();
     this.config = config;
     this.mockMode = (config as any).mockMode === true || !GoogleGenerativeAI || !config.apiKey;
-    
+
     // Initialize Google AI client if not in mock mode
     if (!this.mockMode && GoogleGenerativeAI) {
       try {
@@ -95,23 +95,23 @@ export class GoogleAiProvider extends BaseAiProvider {
     if (this.mockMode) {
       return true; // Mock mode is always available
     }
-    
+
     if (!this.client) {
       return false;
     }
-    
+
     // Google AI doesn't have a simple health check, so we just verify client exists
     return true;
   }
 
   /**
    * Generate content using Google Gemini
-   * 
+   *
    * Automatically uses mock mode if:
    * - Google AI SDK not installed
    * - No API key provided
    * - mockMode explicitly enabled
-   * 
+   *
    * @throws {Error} If API call fails (not in mock mode)
    */
   async generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
@@ -125,7 +125,7 @@ export class GoogleAiProvider extends BaseAiProvider {
     try {
       // Get the generative model
       const model = this.client.getGenerativeModel({ model: this.getModelName() });
-      
+
       // Generate content
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: request.prompt }] }],
@@ -142,7 +142,7 @@ export class GoogleAiProvider extends BaseAiProvider {
 
       // Extract token usage if available
       const usageMetadata = response.usageMetadata || {};
-      
+
       return {
         content,
         alternatives: alternatives ?? [],
@@ -167,7 +167,7 @@ export class GoogleAiProvider extends BaseAiProvider {
       } else if (error.message?.includes('SERVICE_UNAVAILABLE')) {
         throw new Error('Google AI service is temporarily unavailable');
       }
-      
+
       throw new Error(`Google AI API error: ${error.message || 'Unknown error'}`);
     }
   }
@@ -176,10 +176,7 @@ export class GoogleAiProvider extends BaseAiProvider {
    * Generate mock response for testing
    * @private
    */
-  private generateMock(
-    request: AiGenerationRequest,
-    startTime: number
-  ): AiGenerationResponse {
+  private generateMock(request: AiGenerationRequest, startTime: number): AiGenerationResponse {
     const content = this.generateMockResponse(request);
     const processingTime = Date.now() - startTime;
     const alternatives = this.extractAlternatives(content);
@@ -216,7 +213,7 @@ export class GoogleAiProvider extends BaseAiProvider {
     };
   }> {
     const available = await this.isAvailable();
-    
+
     return {
       available,
       model: this.getModelName(),

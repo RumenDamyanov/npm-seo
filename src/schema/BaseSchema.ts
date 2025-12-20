@@ -2,10 +2,10 @@ import type { JsonLdData } from '../types/SeoTypes';
 
 /**
  * Base class for all Schema.org types
- * 
+ *
  * Provides common functionality for building JSON-LD structured data
  * All schema classes should extend this base class
- * 
+ *
  * @example
  * ```typescript
  * class CustomSchema extends BaseSchema {
@@ -28,12 +28,12 @@ export abstract class BaseSchema {
 
   /**
    * Convert schema to JSON-LD format
-   * 
+   *
    * @returns JSON-LD structured data object
    */
   toJsonLd(): JsonLdData {
     this.validate();
-    
+
     return {
       ...this.data,
       '@type': this.getType(),
@@ -42,7 +42,7 @@ export abstract class BaseSchema {
 
   /**
    * Convert schema to JSON string
-   * 
+   *
    * @param pretty - Whether to pretty-print the JSON
    * @returns JSON string representation
    */
@@ -52,7 +52,7 @@ export abstract class BaseSchema {
 
   /**
    * Convert schema to script tag for HTML embedding
-   * 
+   *
    * @returns HTML script tag with JSON-LD
    */
   toScriptTag(): string {
@@ -61,7 +61,7 @@ export abstract class BaseSchema {
 
   /**
    * Set a property on the schema
-   * 
+   *
    * @param key - Property key
    * @param value - Property value
    * @returns This instance for chaining
@@ -76,7 +76,7 @@ export abstract class BaseSchema {
 
   /**
    * Get a property from the schema
-   * 
+   *
    * @param key - Property key
    * @returns Property value
    * @protected
@@ -87,7 +87,7 @@ export abstract class BaseSchema {
 
   /**
    * Format a date to ISO 8601 string
-   * 
+   *
    * @param date - Date as string or Date object
    * @returns ISO 8601 formatted date string
    * @protected
@@ -102,7 +102,7 @@ export abstract class BaseSchema {
   /**
    * Validate required fields
    * Should be overridden by subclasses to add validation
-   * 
+   *
    * @throws {Error} If validation fails
    * @protected
    */
@@ -112,7 +112,7 @@ export abstract class BaseSchema {
 
   /**
    * Validate that a required field is present
-   * 
+   *
    * @param fieldName - Name of the field
    * @param value - Value to validate
    * @throws {Error} If field is missing
@@ -126,7 +126,7 @@ export abstract class BaseSchema {
 
   /**
    * Merge data from another object
-   * 
+   *
    * @param data - Data to merge
    * @returns This instance for chaining
    */
@@ -141,7 +141,7 @@ export abstract class BaseSchema {
 
   /**
    * Get all data (excluding @context and @type)
-   * 
+   *
    * @returns Schema data
    */
   getData(): Record<string, unknown> {
@@ -151,7 +151,7 @@ export abstract class BaseSchema {
 
   /**
    * Clone this schema instance
-   * 
+   *
    * @returns New schema instance with same data
    */
   clone(): this {
@@ -160,4 +160,3 @@ export abstract class BaseSchema {
     return cloned;
   }
 }
-

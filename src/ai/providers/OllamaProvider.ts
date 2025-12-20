@@ -8,9 +8,9 @@ import type {
 
 /**
  * Ollama provider implementation for local AI models
- * 
+ *
  * Connects to local Ollama instance for running models like Llama, Qwen, Mistral, etc.
- * 
+ *
  * @example
  * ```typescript
  * // Real API mode (local Ollama)
@@ -18,7 +18,7 @@ import type {
  *   apiUrl: 'http://localhost:11434',
  *   model: 'llama3.3',
  * });
- * 
+ *
  * // Mock mode (for testing)
  * const provider = new OllamaProvider({
  *   apiUrl: 'http://localhost:11434',
@@ -41,7 +41,7 @@ export class OllamaProvider extends BaseAiProvider {
       tokensPerMinute: 100000,
     },
   };
-  
+
   private config: OllamaConfig;
   private mockMode: boolean;
 
@@ -72,22 +72,22 @@ export class OllamaProvider extends BaseAiProvider {
     if (this.mockMode) {
       return true; // Mock mode is always available
     }
-    
+
     if (!this.config.apiUrl || !this.config.model) {
       return false;
     }
-    
+
     try {
       // Check if Ollama is running
       const response = await fetch(`${this.config.apiUrl}/api/tags`, {
         method: 'GET',
         signal: AbortSignal.timeout(this.config.timeout ?? 5000),
       });
-      
+
       if (!response.ok) {
         return false;
       }
-      
+
       const data = await response.json();
       // Check if the specified model is available
       const models = data.models || [];
@@ -99,10 +99,10 @@ export class OllamaProvider extends BaseAiProvider {
 
   /**
    * Generate content using Ollama
-   * 
+   *
    * Connects to local Ollama instance for generation
    * Automatically uses mock mode if mockMode is enabled
-   * 
+   *
    * @throws {Error} If API call fails (not in mock mode)
    */
   async generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
@@ -160,13 +160,19 @@ export class OllamaProvider extends BaseAiProvider {
     } catch (error: any) {
       // Handle Ollama-specific errors
       if (error.name === 'AbortError' || error.name === 'TimeoutError') {
-        throw new Error('Ollama request timed out. The model may be loading or the request is too complex.');
+        throw new Error(
+          'Ollama request timed out. The model may be loading or the request is too complex.'
+        );
       } else if (error.message?.includes('ECONNREFUSED')) {
-        throw new Error('Could not connect to Ollama. Make sure Ollama is running at ' + this.config.apiUrl);
+        throw new Error(
+          'Could not connect to Ollama. Make sure Ollama is running at ' + this.config.apiUrl
+        );
       } else if (error.message?.includes('model not found')) {
-        throw new Error(`Model "${this.config.model}" not found. Pull it with: ollama pull ${this.config.model}`);
+        throw new Error(
+          `Model "${this.config.model}" not found. Pull it with: ollama pull ${this.config.model}`
+        );
       }
-      
+
       throw new Error(`Ollama error: ${error.message || 'Unknown error'}`);
     }
   }
@@ -175,10 +181,7 @@ export class OllamaProvider extends BaseAiProvider {
    * Generate mock response for testing
    * @private
    */
-  private generateMock(
-    request: AiGenerationRequest,
-    startTime: number
-  ): AiGenerationResponse {
+  private generateMock(request: AiGenerationRequest, startTime: number): AiGenerationResponse {
     const content = this.generateMockResponse(request);
     const processingTime = Date.now() - startTime;
     const alternatives = this.extractAlternatives(content);
@@ -215,7 +218,7 @@ export class OllamaProvider extends BaseAiProvider {
     };
   }> {
     const available = await this.isAvailable();
-    
+
     return {
       available,
       model: this.getModelName(),

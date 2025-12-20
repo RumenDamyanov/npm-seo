@@ -98,12 +98,9 @@ export class NextSeo {
   /**
    * Generate structured data for SEO
    */
-  generateStructuredData(
-    seoManager: SeoManager,
-    url?: string
-  ): Record<string, string> {
+  generateStructuredData(seoManager: SeoManager, url?: string): Record<string, string> {
     const analysis = seoManager.getAnalysis();
-    
+
     const structuredData = {
       '@context': 'https://schema.org',
       '@type': 'WebPage',

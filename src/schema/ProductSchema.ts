@@ -3,9 +3,9 @@ import type { JsonLdData } from '../types/SeoTypes';
 
 /**
  * Product schema for e-commerce products
- * 
+ *
  * Represents a product with pricing, availability, and review information
- * 
+ *
  * @example
  * ```typescript
  * const product = new ProductSchema()
@@ -16,7 +16,7 @@ import type { JsonLdData } from '../types/SeoTypes';
  *   .setPrice(29.99, 'USD')
  *   .setAvailability('InStock')
  *   .setBrand('Brand Name');
- * 
+ *
  * const jsonLd = product.toJsonLd();
  * ```
  */
@@ -27,7 +27,7 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Set the product name (required)
-   * 
+   *
    * @param name - Product name
    * @returns This instance for chaining
    */
@@ -37,7 +37,7 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Set the product description
-   * 
+   *
    * @param description - Product description
    * @returns This instance for chaining
    */
@@ -47,7 +47,7 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Set the product image(s)
-   * 
+   *
    * @param image - Single image URL or array of URLs
    * @returns This instance for chaining
    */
@@ -57,7 +57,7 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Set the product SKU
-   * 
+   *
    * @param sku - Stock Keeping Unit
    * @returns This instance for chaining
    */
@@ -67,7 +67,7 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Set the product brand
-   * 
+   *
    * @param brand - Brand name or Brand schema
    * @returns This instance for chaining
    */
@@ -83,7 +83,7 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Set the product price
-   * 
+   *
    * @param price - Price amount
    * @param currency - Currency code (e.g., "USD", "EUR")
    * @param priceValidUntil - Optional price validity date
@@ -105,11 +105,13 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Set product availability
-   * 
+   *
    * @param availability - Availability status (InStock, OutOfStock, PreOrder, etc.)
    * @returns This instance for chaining
    */
-  setAvailability(availability: 'InStock' | 'OutOfStock' | 'PreOrder' | 'Discontinued' | 'LimitedAvailability'): this {
+  setAvailability(
+    availability: 'InStock' | 'OutOfStock' | 'PreOrder' | 'Discontinued' | 'LimitedAvailability'
+  ): this {
     const offer = this.getProperty<Record<string, unknown>>('offers') || { '@type': 'Offer' };
     offer.availability = `https://schema.org/${availability}`;
     return this.setProperty('offers', offer);
@@ -117,21 +119,22 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Set the seller/seller URL
-   * 
+   *
    * @param seller - Seller name or URL
    * @returns This instance for chaining
    */
   setSeller(seller: string): this {
     const offer = this.getProperty<Record<string, unknown>>('offers') || { '@type': 'Offer' };
-    offer.seller = typeof seller === 'string' && seller.startsWith('http')
-      ? seller
-      : { '@type': 'Organization', name: seller };
+    offer.seller =
+      typeof seller === 'string' && seller.startsWith('http')
+        ? seller
+        : { '@type': 'Organization', name: seller };
     return this.setProperty('offers', offer);
   }
 
   /**
    * Set product URL
-   * 
+   *
    * @param url - Product page URL
    * @returns This instance for chaining
    */
@@ -147,7 +150,7 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Add aggregate rating
-   * 
+   *
    * @param ratingValue - Rating value (e.g., 4.5)
    * @param reviewCount - Number of reviews
    * @param bestRating - Best possible rating (default: 5)
@@ -171,18 +174,22 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Add a review
-   * 
+   *
    * @param review - Review schema or object
    * @returns This instance for chaining
    */
-  addReview(review: JsonLdData | {
-    author: string;
-    datePublished: string | Date;
-    reviewBody: string;
-    ratingValue: number;
-  }): this {
+  addReview(
+    review:
+      | JsonLdData
+      | {
+          author: string;
+          datePublished: string | Date;
+          reviewBody: string;
+          ratingValue: number;
+        }
+  ): this {
     const reviews = this.getProperty<JsonLdData[]>('review') || [];
-    
+
     if ('@type' in review) {
       reviews.push(review);
     } else {
@@ -200,13 +207,13 @@ export class ProductSchema extends BaseSchema {
         },
       } as JsonLdData);
     }
-    
+
     return this.setProperty('review', reviews);
   }
 
   /**
    * Set product GTIN (Global Trade Item Number)
-   * 
+   *
    * @param gtin - GTIN, GTIN-8, GTIN-12, GTIN-13, or GTIN-14
    * @returns This instance for chaining
    */
@@ -214,18 +221,18 @@ export class ProductSchema extends BaseSchema {
     // Auto-detect GTIN type based on length
     const gtinLength = gtin.replace(/\D/g, '').length;
     let gtinType = 'gtin';
-    
+
     if (gtinLength === 8) gtinType = 'gtin8';
     else if (gtinLength === 12) gtinType = 'gtin12';
     else if (gtinLength === 13) gtinType = 'gtin13';
     else if (gtinLength === 14) gtinType = 'gtin14';
-    
+
     return this.setProperty(gtinType, gtin);
   }
 
   /**
    * Set product MPN (Manufacturer Part Number)
-   * 
+   *
    * @param mpn - Manufacturer Part Number
    * @returns This instance for chaining
    */
@@ -239,7 +246,7 @@ export class ProductSchema extends BaseSchema {
    */
   protected override validate(): void {
     super.validate();
-    
+
     const name = this.getProperty<string>('name');
     if (!name) {
       throw new Error('ProductSchema: name is required');
@@ -248,7 +255,7 @@ export class ProductSchema extends BaseSchema {
 
   /**
    * Create ProductSchema from a data object
-   * 
+   *
    * @param data - Product data
    * @returns New ProductSchema instance
    */
@@ -265,8 +272,7 @@ export class ProductSchema extends BaseSchema {
     gtin?: string;
     mpn?: string;
   }): ProductSchema {
-    const schema = new ProductSchema()
-      .setName(data.name);
+    const schema = new ProductSchema().setName(data.name);
 
     if (data.description) schema.setDescription(data.description);
     if (data.image) schema.setImage(data.image);
@@ -281,4 +287,3 @@ export class ProductSchema extends BaseSchema {
     return schema;
   }
 }
-

@@ -7,12 +7,7 @@ export { SeoManager } from './core/SeoManager';
 export { ContentAnalyzer } from './core/ContentAnalyzer';
 
 // Schema.org classes
-export {
-  BaseSchema,
-  ArticleSchema,
-  BreadcrumbListSchema,
-  ProductSchema,
-} from './schema';
+export { BaseSchema, ArticleSchema, BreadcrumbListSchema, ProductSchema } from './schema';
 
 // AI providers and SEO analyzer
 export {
@@ -33,12 +28,7 @@ export { AiSeoAnalyzer } from './ai/AiSeoAnalyzer';
 
 // Cache system
 export { CacheKeyGenerator, MemoryCache, RedisCache } from './cache';
-export type {
-  CacheInterface,
-  CacheConfig,
-  CacheStats,
-  CacheEntry,
-} from './cache';
+export type { CacheInterface, CacheConfig, CacheStats, CacheEntry } from './cache';
 
 // Framework integrations
 export {

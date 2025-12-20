@@ -321,15 +321,21 @@ console.log(`Queued: ${stats.queuedRequests}`);
 // Rate limiter manager for multiple providers
 const manager = new RateLimiterManager();
 
-manager.setLimiter('openai', new RateLimiter({
-  maxRequests: 60,
-  windowMs: 60000,
-}));
+manager.setLimiter(
+  'openai',
+  new RateLimiter({
+    maxRequests: 60,
+    windowMs: 60000,
+  })
+);
 
-manager.setLimiter('anthropic', new RateLimiter({
-  maxRequests: 50,
-  windowMs: 60000,
-}));
+manager.setLimiter(
+  'anthropic',
+  new RateLimiter({
+    maxRequests: 50,
+    windowMs: 60000,
+  })
+);
 
 const limiter = manager.getLimiter('openai');
 await limiter.acquire();
@@ -340,12 +346,7 @@ await limiter.acquire();
 Automatic fallback between AI providers:
 
 ```typescript
-import { 
-  AiProviderChain, 
-  OpenAiProvider, 
-  AnthropicProvider,
-  GoogleAiProvider 
-} from '@rumenx/seo';
+import { AiProviderChain, OpenAiProvider, AnthropicProvider, GoogleAiProvider } from '@rumenx/seo';
 
 // Create AI providers
 const providers = [

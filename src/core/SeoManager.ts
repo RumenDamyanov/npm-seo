@@ -39,15 +39,15 @@ interface SeoResult {
 
 /**
  * Main SEO manager for content analysis and optimization
- * 
+ *
  * Supports fluent interface for method chaining
- * 
+ *
  * @example
  * ```typescript
  * // Fluent interface usage
  * const seo = new SeoManager(config);
  * const title = seo.analyze(content).generateTitle();
- * 
+ *
  * // Generate all SEO data at once
  * const seoData = seo.analyze(content).generateAll();
  * ```
@@ -67,19 +67,15 @@ export class SeoManager {
 
   /**
    * Analyze content and generate SEO recommendations
-   * 
+   *
    * Stores analysis result for use with fluent interface methods
-   * 
+   *
    * @param content - HTML content to analyze
    * @param metadata - Additional metadata
    * @param options - Analysis options
    * @returns This instance for chaining (fluent interface)
    */
-  analyze(
-    content: string,
-    metadata: ContentMetadata = {},
-    options: { fast?: boolean } = {}
-  ): this {
+  analyze(content: string, metadata: ContentMetadata = {}, options: { fast?: boolean } = {}): this {
     const startTime = Date.now();
 
     // Analyze content
@@ -116,7 +112,7 @@ export class SeoManager {
 
   /**
    * Get the last analysis result
-   * 
+   *
    * @returns Last SEO result or null if no analysis performed
    */
   getResult(): SeoResult | null {
@@ -125,7 +121,7 @@ export class SeoManager {
 
   /**
    * Get the last content analysis
-   * 
+   *
    * @returns Last content analysis or null
    */
   getAnalysis(): ContentAnalysis | null {
@@ -165,7 +161,7 @@ export class SeoManager {
 
   /**
    * Generate optimized title based on analysis
-   * 
+   *
    * @param maxLength - Maximum title length (default: 60)
    * @returns Generated title
    * @throws {Error} If no analysis has been performed
@@ -197,7 +193,7 @@ export class SeoManager {
 
   /**
    * Generate optimized meta description based on analysis
-   * 
+   *
    * @param maxLength - Maximum description length (default: 160)
    * @returns Generated description
    * @throws {Error} If no analysis has been performed
@@ -211,7 +207,11 @@ export class SeoManager {
     const currentDescription = seoMetrics.metaDescription;
 
     // If current description is good, use it
-    if (currentDescription && currentDescription.length >= 120 && currentDescription.length <= 160) {
+    if (
+      currentDescription &&
+      currentDescription.length >= 120 &&
+      currentDescription.length <= 160
+    ) {
       return currentDescription;
     }
 
@@ -237,7 +237,7 @@ export class SeoManager {
 
   /**
    * Generate keywords array based on analysis
-   * 
+   *
    * @param maxKeywords - Maximum number of keywords (default: 10)
    * @returns Array of keywords
    * @throws {Error} If no analysis has been performed
@@ -252,17 +252,17 @@ export class SeoManager {
 
   /**
    * Generate all SEO data at once
-   * 
+   *
    * Generates title, description, keywords, and returns recommendations and score
-   * 
+   *
    * @returns Complete SEO data
    * @throws {Error} If no analysis has been performed
-   * 
+   *
    * @example
    * ```typescript
    * const seo = new SeoManager(config);
    * const seoData = seo.analyze(content).generateAll();
-   * 
+   *
    * console.log(seoData.title);
    * console.log(seoData.description);
    * console.log(seoData.keywords);
@@ -301,7 +301,7 @@ export class SeoManager {
 
   /**
    * Update configuration (fluent interface)
-   * 
+   *
    * @param newConfig - Partial configuration to merge
    * @returns This instance for chaining
    */
@@ -313,7 +313,7 @@ export class SeoManager {
 
   /**
    * Set AI provider (fluent interface)
-   * 
+   *
    * @param provider - AI provider instance
    * @returns This instance for chaining
    */
@@ -653,13 +653,13 @@ Generate ${options.contentLength ?? 'additional'} content suggestions that would
 
   /**
    * Analyze multiple documents in batch
-   * 
+   *
    * Efficiently processes multiple HTML documents and returns SEO analysis for each
-   * 
+   *
    * @param documents - Array of documents to analyze
    * @param options - Batch processing options
    * @returns Array of SEO results
-   * 
+   *
    * @example
    * ```typescript
    * const seoManager = new SeoManager(config);
@@ -699,7 +699,7 @@ Generate ${options.contentLength ?? 'additional'} content suggestions that would
     // Process in chunks
     for (let i = 0; i < documents.length; i += concurrency) {
       const chunk = documents.slice(i, i + concurrency);
-      const chunkPromises = chunk.map(async (doc) => {
+      const chunkPromises = chunk.map(async doc => {
         try {
           // Analyze document
           const analyzeOptions = options.fast !== undefined ? { fast: options.fast } : {};
@@ -752,13 +752,13 @@ Generate ${options.contentLength ?? 'additional'} content suggestions that would
 
   /**
    * Generate SEO data for multiple documents using AI
-   * 
+   *
    * Batch processes multiple documents and generates titles, descriptions, keywords for each
-   * 
+   *
    * @param documents - Array of analyzed documents
    * @param options - Generation options
    * @returns Map of document ID to generated SEO data
-   * 
+   *
    * @example
    * ```typescript
    * const seoManager = new SeoManager(config, aiProvider);
@@ -810,7 +810,7 @@ Generate ${options.contentLength ?? 'additional'} content suggestions that would
     // Process in chunks
     for (let i = 0; i < documents.length; i += concurrency) {
       const chunk = documents.slice(i, i + concurrency);
-      const chunkPromises = chunk.map(async (doc) => {
+      const chunkPromises = chunk.map(async doc => {
         const generatedData: {
           title?: string[];
           description?: string[];

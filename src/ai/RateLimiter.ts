@@ -118,12 +118,8 @@ export class RateLimiter {
       this.lastRefill = now;
     } else {
       // Partial refill based on elapsed time
-      const tokensToAdd =
-        (this.config.maxRequests * elapsed) / this.config.windowMs;
-      this.tokens = Math.min(
-        this.config.maxRequests,
-        this.tokens + tokensToAdd
-      );
+      const tokensToAdd = (this.config.maxRequests * elapsed) / this.config.windowMs;
+      this.tokens = Math.min(this.config.maxRequests, this.tokens + tokensToAdd);
       this.lastRefill = now;
     }
   }
@@ -154,9 +150,7 @@ export class RateLimiter {
    * Check if we can acquire a token
    */
   private canAcquire(): boolean {
-    return (
-      this.tokens >= 1 && this.concurrent < this.config.maxConcurrent
-    );
+    return this.tokens >= 1 && this.concurrent < this.config.maxConcurrent;
   }
 
   /**
@@ -178,10 +172,7 @@ export class RateLimiter {
 
     // Queue the request if enabled
     if (this.config.enableQueue) {
-      if (
-        this.config.maxQueueSize > 0 &&
-        this.queue.length >= this.config.maxQueueSize
-      ) {
+      if (this.config.maxQueueSize > 0 && this.queue.length >= this.config.maxQueueSize) {
         this.stats.rejectedRequests++;
         throw new Error('Rate limit queue is full');
       }
@@ -266,8 +257,7 @@ export class RateLimiter {
    */
   private updateAverageWaitTime(waitTime: number): void {
     const total = this.stats.acceptedRequests;
-    this.stats.averageWaitTime =
-      (this.stats.averageWaitTime * (total - 1) + waitTime) / total;
+    this.stats.averageWaitTime = (this.stats.averageWaitTime * (total - 1) + waitTime) / total;
   }
 
   /**
@@ -362,4 +352,3 @@ export class RateLimiterManager {
     this.limiters.clear();
   }
 }
-

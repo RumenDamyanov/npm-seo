@@ -2,11 +2,7 @@
  * Tests for Schema.org classes
  */
 
-import {
-  ArticleSchema,
-  BreadcrumbListSchema,
-  ProductSchema,
-} from '../../src/schema';
+import { ArticleSchema, BreadcrumbListSchema, ProductSchema } from '../../src/schema';
 
 describe('ArticleSchema', () => {
   it('should create basic article schema', () => {
@@ -286,9 +282,7 @@ describe('ProductSchema', () => {
   });
 
   it('should convert to JSON-LD string', () => {
-    const product = new ProductSchema()
-      .setName('Test Product')
-      .setSKU('TEST-001');
+    const product = new ProductSchema().setName('Test Product').setSKU('TEST-001');
 
     const jsonString = product.toJsonLd();
 
@@ -314,4 +308,3 @@ describe('BaseSchema', () => {
     expect(json.name).toBe('Article Name');
   });
 });
-

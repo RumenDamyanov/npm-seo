@@ -6,12 +6,7 @@
  * @packageDocumentation
  */
 
-import {
-  CacheInterface,
-  CacheConfig,
-  CacheEntry,
-  CacheStats,
-} from './CacheInterface';
+import { CacheInterface, CacheConfig, CacheEntry, CacheStats } from './CacheInterface';
 
 /**
  * In-memory cache with LRU eviction
@@ -263,4 +258,3 @@ export class MemoryCache implements CacheInterface {
     this.stats.hitRate = total > 0 ? this.stats.hits / total : 0;
   }
 }
-

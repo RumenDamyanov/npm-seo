@@ -6,11 +6,7 @@
  * @packageDocumentation
  */
 
-import {
-  CacheInterface,
-  CacheConfig,
-  CacheStats,
-} from './CacheInterface';
+import { CacheInterface, CacheConfig, CacheStats } from './CacheInterface';
 
 /**
  * Redis cache configuration
@@ -257,17 +253,17 @@ export class RedisCache implements CacheInterface {
     }
 
     try {
-      const nsKeys = keys.map((k) => this.getKey(k));
+      const nsKeys = keys.map(k => this.getKey(k));
       const values: (string | null)[] = await this.client.mGet(nsKeys);
 
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const value = values[i];
-        
+
         if (!key) {
           continue;
         }
-        
+
         if (value !== null && value !== undefined && typeof value === 'string') {
           result.set(key, JSON.parse(value) as T);
           if (this.config.enableStats) {
@@ -333,7 +329,7 @@ export class RedisCache implements CacheInterface {
     }
 
     try {
-      const nsKeys = keys.map((k) => this.getKey(k));
+      const nsKeys = keys.map(k => this.getKey(k));
       const deleted = await this.client.del(nsKeys);
 
       if (this.config.enableStats) {
@@ -394,4 +390,3 @@ export class RedisCache implements CacheInterface {
     this.stats.hitRate = total > 0 ? this.stats.hits / total : 0;
   }
 }
-

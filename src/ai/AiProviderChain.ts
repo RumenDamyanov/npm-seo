@@ -104,18 +104,13 @@ export class AiProviderChain {
    * @returns AI generation response
    * @throws Error if all providers fail
    */
-  async generate(
-    prompt: string,
-    options?: Record<string, unknown>
-  ): Promise<AiGenerationResponse> {
+  async generate(prompt: string, options?: Record<string, unknown>): Promise<AiGenerationResponse> {
     this.stats.totalRequests++;
     const startTime = Date.now();
     const errors: Array<{ provider: string; error: Error }> = [];
 
     // Filter available providers
-    const availableProviders = this.config.providers.filter((p) =>
-      p.isAvailable()
-    );
+    const availableProviders = this.config.providers.filter(p => p.isAvailable());
 
     if (availableProviders.length === 0) {
       this.stats.failedRequests++;
@@ -132,11 +127,7 @@ export class AiProviderChain {
 
         try {
           // Try to generate with timeout
-          const response = await this.generateWithTimeout(
-            provider,
-            prompt,
-            options
-          );
+          const response = await this.generateWithTimeout(provider, prompt, options);
 
           // Success!
           this.stats.successfulRequests++;
@@ -164,9 +155,7 @@ export class AiProviderChain {
 
     // All providers failed
     this.stats.failedRequests++;
-    const errorMessages = errors
-      .map((e) => `${e.provider}: ${e.error.message}`)
-      .join('; ');
+    const errorMessages = errors.map(e => `${e.provider}: ${e.error.message}`).join('; ');
     throw new Error(`All AI providers failed. Errors: ${errorMessages}`);
   }
 
@@ -220,11 +209,8 @@ export class AiProviderChain {
       },
       ...options,
     };
-    
-    return Promise.race([
-      provider.generate(request),
-      this.timeoutPromise(this.config.timeout),
-    ]);
+
+    return Promise.race([provider.generate(request), this.timeoutPromise(this.config.timeout)]);
   }
 
   /**
@@ -242,7 +228,7 @@ export class AiProviderChain {
    * Sleep utility
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -299,7 +285,7 @@ export class AiProviderChain {
    * Get list of available providers
    */
   getAvailableProviders(): string[] {
-    return this.config.providers.filter((p) => p.isAvailable()).map((p) => p.name);
+    return this.config.providers.filter(p => p.isAvailable()).map(p => p.name);
   }
 
   /**
@@ -317,7 +303,7 @@ export class AiProviderChain {
    * Remove a provider from the chain
    */
   removeProvider(providerName: string): boolean {
-    const index = this.config.providers.findIndex((p) => p.name === providerName);
+    const index = this.config.providers.findIndex(p => p.name === providerName);
     if (index !== -1) {
       this.config.providers.splice(index, 1);
       return true;
@@ -329,7 +315,7 @@ export class AiProviderChain {
    * Get provider by name
    */
   getProvider(name: string): IAiProvider | undefined {
-    return this.config.providers.find((p) => p.name === name);
+    return this.config.providers.find(p => p.name === name);
   }
 
   /**
@@ -346,4 +332,3 @@ export class AiProviderChain {
     return true;
   }
 }
-

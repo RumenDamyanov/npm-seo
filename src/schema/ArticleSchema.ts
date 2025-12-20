@@ -3,9 +3,9 @@ import type { JsonLdData } from '../types/SeoTypes';
 
 /**
  * Article schema for blog posts, news articles, and other written content
- * 
+ *
  * Supports Schema.org Article type with fluent interface
- * 
+ *
  * @example
  * ```typescript
  * const article = new ArticleSchema()
@@ -14,7 +14,7 @@ import type { JsonLdData } from '../types/SeoTypes';
  *   .setAuthor('John Doe')
  *   .setDatePublished(new Date())
  *   .setImage('https://example.com/image.jpg');
- * 
+ *
  * const jsonLd = article.toJsonLd();
  * const scriptTag = article.toScriptTag();
  * ```
@@ -26,7 +26,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the article headline (required)
-   * 
+   *
    * @param headline - Article title/headline
    * @returns This instance for chaining
    */
@@ -36,7 +36,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the article description
-   * 
+   *
    * @param description - Article description/summary
    * @returns This instance for chaining
    */
@@ -46,7 +46,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the article author
-   * 
+   *
    * @param author - Author name, URL, or Person/Organization schema
    * @returns This instance for chaining
    */
@@ -62,22 +62,20 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set multiple authors
-   * 
+   *
    * @param authors - Array of author names or schemas
    * @returns This instance for chaining
    */
   setAuthors(authors: Array<string | JsonLdData>): this {
     const authorSchemas = authors.map(author =>
-      typeof author === 'string'
-        ? { '@type': 'Person', name: author }
-        : author
+      typeof author === 'string' ? { '@type': 'Person', name: author } : author
     );
     return this.setProperty('author', authorSchemas);
   }
 
   /**
    * Set the publication date
-   * 
+   *
    * @param date - Publication date
    * @returns This instance for chaining
    */
@@ -87,7 +85,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the last modified date
-   * 
+   *
    * @param date - Modification date
    * @returns This instance for chaining
    */
@@ -97,7 +95,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the article image(s)
-   * 
+   *
    * @param image - Single image URL or array of URLs
    * @returns This instance for chaining
    */
@@ -107,7 +105,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the publisher information
-   * 
+   *
    * @param publisher - Publisher name or Organization schema
    * @returns This instance for chaining
    */
@@ -123,7 +121,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the article URL
-   * 
+   *
    * @param url - Article URL
    * @returns This instance for chaining
    */
@@ -133,7 +131,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the article body/content
-   * 
+   *
    * @param text - Article text content
    * @returns This instance for chaining
    */
@@ -143,7 +141,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the word count
-   * 
+   *
    * @param count - Number of words
    * @returns This instance for chaining
    */
@@ -153,7 +151,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set article keywords/tags
-   * 
+   *
    * @param keywords - Keywords as string or array
    * @returns This instance for chaining
    */
@@ -163,7 +161,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the article section/category
-   * 
+   *
    * @param section - Section name (e.g., "Technology", "Sports")
    * @returns This instance for chaining
    */
@@ -173,7 +171,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the language
-   * 
+   *
    * @param language - Language code (e.g., "en", "es")
    * @returns This instance for chaining
    */
@@ -183,7 +181,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Add a comment to the article
-   * 
+   *
    * @param comment - Comment schema or object
    * @returns This instance for chaining
    */
@@ -195,7 +193,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Set the main entity of the page
-   * 
+   *
    * @param entity - Main entity schema
    * @returns This instance for chaining
    */
@@ -209,7 +207,7 @@ export class ArticleSchema extends BaseSchema {
    */
   protected override validate(): void {
     super.validate();
-    
+
     const headline = this.getProperty<string>('headline');
     if (!headline) {
       throw new Error('ArticleSchema: headline is required');
@@ -218,7 +216,7 @@ export class ArticleSchema extends BaseSchema {
 
   /**
    * Create ArticleSchema from a data object
-   * 
+   *
    * @param data - Article data
    * @returns New ArticleSchema instance
    */
@@ -237,11 +235,10 @@ export class ArticleSchema extends BaseSchema {
     articleSection?: string;
     inLanguage?: string;
   }): ArticleSchema {
-    const schema = new ArticleSchema()
-      .setHeadline(data.headline);
+    const schema = new ArticleSchema().setHeadline(data.headline);
 
     if (data.description) schema.setDescription(data.description);
-    
+
     if (data.author) {
       if (Array.isArray(data.author)) {
         schema.setAuthors(data.author);
@@ -249,7 +246,7 @@ export class ArticleSchema extends BaseSchema {
         schema.setAuthor(data.author);
       }
     }
-    
+
     if (data.datePublished) schema.setDatePublished(data.datePublished);
     if (data.dateModified) schema.setDateModified(data.dateModified);
     if (data.image) schema.setImage(data.image);
@@ -264,4 +261,3 @@ export class ArticleSchema extends BaseSchema {
     return schema;
   }
 }
-

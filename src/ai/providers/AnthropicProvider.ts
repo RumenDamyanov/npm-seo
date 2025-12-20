@@ -17,9 +17,9 @@ try {
 
 /**
  * Anthropic AI provider implementation with real API integration
- * 
+ *
  * Supports Claude 4 models with real API calls and mock mode for testing
- * 
+ *
  * @example
  * ```typescript
  * // Real API mode
@@ -27,7 +27,7 @@ try {
  *   apiKey: process.env.ANTHROPIC_API_KEY,
  *   model: 'claude-4-sonnet-20250101',
  * });
- * 
+ *
  * // Mock mode (for testing)
  * const provider = new AnthropicProvider({
  *   apiKey: 'mock-key',
@@ -50,7 +50,7 @@ export class AnthropicProvider extends BaseAiProvider {
       requestsPerDay: 1000,
     },
   };
-  
+
   private config: AnthropicConfig;
   private client: any | null = null;
   private mockMode: boolean;
@@ -59,7 +59,7 @@ export class AnthropicProvider extends BaseAiProvider {
     super();
     this.config = config;
     this.mockMode = (config as any).mockMode === true || !Anthropic || !config.apiKey;
-    
+
     // Initialize Anthropic client if not in mock mode
     if (!this.mockMode && Anthropic) {
       try {
@@ -96,23 +96,23 @@ export class AnthropicProvider extends BaseAiProvider {
     if (this.mockMode) {
       return true; // Mock mode is always available
     }
-    
+
     if (!this.client) {
       return false;
     }
-    
+
     // Anthropic doesn't have a simple health check, so we just verify client exists
     return true;
   }
 
   /**
    * Generate content using Anthropic Claude
-   * 
+   *
    * Automatically uses mock mode if:
    * - Anthropic SDK not installed
    * - No API key provided
    * - mockMode explicitly enabled
-   * 
+   *
    * @throws {Error} If API call fails (not in mock mode)
    */
   async generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
@@ -166,7 +166,7 @@ export class AnthropicProvider extends BaseAiProvider {
       } else if (error.status === 500 || error.status === 529) {
         throw new Error('Anthropic service is temporarily unavailable');
       }
-      
+
       throw new Error(`Anthropic API error: ${error.message || 'Unknown error'}`);
     }
   }
@@ -175,10 +175,7 @@ export class AnthropicProvider extends BaseAiProvider {
    * Generate mock response for testing
    * @private
    */
-  private generateMock(
-    request: AiGenerationRequest,
-    startTime: number
-  ): AiGenerationResponse {
+  private generateMock(request: AiGenerationRequest, startTime: number): AiGenerationResponse {
     const content = this.generateMockResponse(request);
     const processingTime = Date.now() - startTime;
     const alternatives = this.extractAlternatives(content);
@@ -215,7 +212,7 @@ export class AnthropicProvider extends BaseAiProvider {
     };
   }> {
     const available = await this.isAvailable();
-    
+
     return {
       available,
       model: this.getModelName(),

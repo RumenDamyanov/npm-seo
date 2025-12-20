@@ -81,9 +81,7 @@ describe('AiProviderChain', () => {
 
       const chain = new AiProviderChain({ providers, maxRetries: 1 });
 
-      await expect(chain.generate('test prompt')).rejects.toThrow(
-        'All AI providers failed'
-      );
+      await expect(chain.generate('test prompt')).rejects.toThrow('All AI providers failed');
     });
   });
 
@@ -164,10 +162,7 @@ describe('AiProviderChain', () => {
     it('should call onProviderFailed callback', async () => {
       const onProviderFailed = jest.fn();
 
-      const providers = [
-        new MockProvider('provider1', true),
-        new MockProvider('provider2'),
-      ];
+      const providers = [new MockProvider('provider1', true), new MockProvider('provider2')];
 
       const chain = new AiProviderChain({
         providers,
@@ -177,10 +172,7 @@ describe('AiProviderChain', () => {
 
       await chain.generate('test prompt');
 
-      expect(onProviderFailed).toHaveBeenCalledWith(
-        'provider1',
-        expect.any(Error)
-      );
+      expect(onProviderFailed).toHaveBeenCalledWith('provider1', expect.any(Error));
     });
 
     it('should call onProviderSuccess callback', async () => {
@@ -206,10 +198,7 @@ describe('AiProviderChain', () => {
 
   describe('Statistics', () => {
     it('should track statistics', async () => {
-      const providers = [
-        new MockProvider('provider1', true),
-        new MockProvider('provider2'),
-      ];
+      const providers = [new MockProvider('provider1', true), new MockProvider('provider2')];
 
       const chain = new AiProviderChain({ providers, maxRetries: 1 });
 
@@ -314,16 +303,11 @@ describe('AiProviderChain', () => {
     });
 
     it('should throw when no providers available', async () => {
-      const providers = [
-        new MockProvider('provider1', true),
-        new MockProvider('provider2', true),
-      ];
+      const providers = [new MockProvider('provider1', true), new MockProvider('provider2', true)];
 
       const chain = new AiProviderChain({ providers });
 
-      await expect(chain.generate('test prompt')).rejects.toThrow(
-        'No available AI providers'
-      );
+      await expect(chain.generate('test prompt')).rejects.toThrow('No available AI providers');
     });
 
     it('should list available providers', () => {
@@ -343,4 +327,3 @@ describe('AiProviderChain', () => {
     });
   });
 });
-
