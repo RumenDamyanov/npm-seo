@@ -15,6 +15,12 @@ export { OllamaProvider } from './providers/OllamaProvider';
 // Provider factory
 export { AiProviderFactory } from './AiProviderFactory';
 
+// Rate limiting and provider chain
+export { RateLimiter, RateLimiterManager } from './RateLimiter';
+export { AiProviderChain } from './AiProviderChain';
+export type { RateLimiterConfig, RateLimiterStats } from './RateLimiter';
+export type { ProviderChainConfig, ProviderChainStats } from './AiProviderChain';
+
 // Re-export types for convenience
 export type {
   IAiProvider,

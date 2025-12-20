@@ -19,7 +19,7 @@ export class NextSeo {
   /**
    * Analyze content for SEO
    */
-  analyzeContent(content: string): ReturnType<SeoManager['analyze']> {
+  analyzeContent(content: string): SeoManager {
     return this.seoManager.analyze(content);
   }
 
@@ -44,11 +44,12 @@ export class NextSeo {
           return;
         }
 
-        const analysis = this.analyzeContent(content);
+        const seoManager = this.analyzeContent(content);
+        const result = seoManager.getResult();
 
         res.status(200).json({
           success: true,
-          data: analysis,
+          data: result,
           timestamp: new Date().toISOString(),
         });
       } catch (error) {
@@ -63,30 +64,31 @@ export class NextSeo {
   /**
    * Generate meta tags for Next.js Head component
    */
-  generateMetaTags(analysis: ReturnType<SeoManager['analyze']>): Array<{
+  generateMetaTags(seoManager: SeoManager): Array<{
     name: string;
     content: string;
   }> {
     const metaTags: Array<{ name: string; content: string }> = [];
+    const analysis = seoManager.getAnalysis();
 
-    if (analysis?.analysis?.seoMetrics?.titleTag) {
+    if (analysis?.seoMetrics?.titleTag) {
       metaTags.push({
         name: 'title',
-        content: analysis.analysis.seoMetrics.titleTag,
+        content: analysis.seoMetrics.titleTag,
       });
     }
 
-    if (analysis?.analysis?.seoMetrics?.metaDescription) {
+    if (analysis?.seoMetrics?.metaDescription) {
       metaTags.push({
         name: 'description',
-        content: analysis.analysis.seoMetrics.metaDescription,
+        content: analysis.seoMetrics.metaDescription,
       });
     }
 
-    if (analysis?.analysis?.keywords?.length > 0) {
+    if (analysis?.keywords && analysis.keywords.length > 0) {
       metaTags.push({
         name: 'keywords',
-        content: analysis.analysis.keywords.slice(0, 10).join(', '),
+        content: analysis.keywords.slice(0, 10).join(', '),
       });
     }
 
@@ -97,15 +99,17 @@ export class NextSeo {
    * Generate structured data for SEO
    */
   generateStructuredData(
-    analysis: ReturnType<SeoManager['analyze']>,
+    seoManager: SeoManager,
     url?: string
   ): Record<string, string> {
+    const analysis = seoManager.getAnalysis();
+    
     const structuredData = {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
       url: url ?? '',
-      name: analysis?.analysis?.seoMetrics?.titleTag ?? '',
-      description: analysis?.analysis?.seoMetrics?.metaDescription ?? '',
+      name: analysis?.seoMetrics?.titleTag ?? '',
+      description: analysis?.seoMetrics?.metaDescription ?? '',
     };
 
     return structuredData;
