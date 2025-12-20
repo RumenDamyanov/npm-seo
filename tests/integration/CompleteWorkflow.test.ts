@@ -228,7 +228,7 @@ describe('Complete SEO Workflow Integration', () => {
       expect(analysis!.keywords).toBeDefined();
 
       // Generate suggestions with AI
-      const suggestions = await seoManager.generateSuggestions(analysis!, 'title');
+      const suggestions = await seoManager.generateSuggestions(analysis, 'title');
 
       expect(suggestions).toBeDefined();
       expect(Array.isArray(suggestions)).toBe(true);

@@ -19,7 +19,7 @@ export class NextSeo {
   /**
    * Analyze content for SEO
    */
-  analyzeContent(content: string): SeoManager {
+  analyzeContent(content: string): ReturnType<SeoManager['analyze']> {
     return this.seoManager.analyze(content);
   }
 
@@ -44,8 +44,7 @@ export class NextSeo {
           return;
         }
 
-        const seoManager = this.analyzeContent(content);
-        const result = seoManager.getResult();
+        const result = this.analyzeContent(content);
 
         res.status(200).json({
           success: true,

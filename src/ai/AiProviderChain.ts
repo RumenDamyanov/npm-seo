@@ -110,7 +110,15 @@ export class AiProviderChain {
     const errors: Array<{ provider: string; error: Error }> = [];
 
     // Filter available providers
-    const availableProviders = this.config.providers.filter(p => p.isAvailable());
+    const availabilityChecks = await Promise.all(
+      this.config.providers.map(async p => ({
+        provider: p,
+        available: await p.isAvailable(),
+      }))
+    );
+    const availableProviders = availabilityChecks
+      .filter(({ available }) => available)
+      .map(({ provider }) => provider);
 
     if (availableProviders.length === 0) {
       this.stats.failedRequests++;

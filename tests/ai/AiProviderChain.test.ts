@@ -29,8 +29,8 @@ class MockProvider implements IAiProvider {
     };
   }
 
-  isAvailable(): boolean {
-    return !this.shouldFail;
+  async isAvailable(): Promise<boolean> {
+    return true; // Always available, shouldFail only affects generate()
   }
 
   getModelName(): string {

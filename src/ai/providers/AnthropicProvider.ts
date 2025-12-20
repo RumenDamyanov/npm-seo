@@ -61,11 +61,12 @@ export class AnthropicProvider extends BaseAiProvider {
   constructor(config: AnthropicConfig) {
     super();
     this.config = config;
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
-    this.mockMode = (config as any).mockMode === true || !Anthropic || !config.apiKey;
+
+    // Only enable mock mode if explicitly requested or if Anthropic SDK is not available
+    this.mockMode = (config as any).mockMode === true || !Anthropic;
 
     // Initialize Anthropic client if not in mock mode
-    if (!this.mockMode && Anthropic) {
+    if (!this.mockMode && Anthropic && config.apiKey) {
       try {
         /* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
         this.client = new Anthropic({
@@ -73,8 +74,8 @@ export class AnthropicProvider extends BaseAiProvider {
         });
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.warn('Failed to initialize Anthropic client, falling back to mock mode:', error);
-        this.mockMode = true;
+        console.warn('Failed to initialize Anthropic client:', error);
+        this.client = null;
       }
     }
   }

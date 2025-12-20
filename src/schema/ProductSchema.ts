@@ -26,16 +26,6 @@ export class ProductSchema extends BaseSchema {
   }
 
   /**
-   * Set the product name (required)
-   *
-   * @param name - Product name
-   * @returns This instance for chaining
-   */
-  setName(name: string): this {
-    return this.setProperty('name', name);
-  }
-
-  /**
    * Set the product description
    *
    * @param description - Product description
@@ -63,6 +53,16 @@ export class ProductSchema extends BaseSchema {
    */
   setSku(sku: string): this {
     return this.setProperty('sku', sku);
+  }
+
+  /**
+   * Alias for setSku() with uppercase naming
+   *
+   * @param sku - Stock Keeping Unit
+   * @returns This instance for chaining
+   */
+  setSKU(sku: string): this {
+    return this.setSku(sku);
   }
 
   /**
@@ -101,6 +101,16 @@ export class ProductSchema extends BaseSchema {
     }
 
     return this.setProperty('offers', offer);
+  }
+
+  /**
+   * Set the full offers object
+   *
+   * @param offers - Complete Offer or array of Offers
+   * @returns This instance for chaining
+   */
+  setOffers(offers: JsonLdData | JsonLdData[]): this {
+    return this.setProperty('offers', offers);
   }
 
   /**

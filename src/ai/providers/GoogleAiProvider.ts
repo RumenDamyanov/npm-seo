@@ -59,15 +59,16 @@ export class GoogleAiProvider extends BaseAiProvider {
   constructor(config: GoogleAiConfig) {
     super();
     this.config = config;
-    this.mockMode = (config as any).mockMode === true || !GoogleGenerativeAI || !config.apiKey;
+    // Only enable mock mode if explicitly requested or if Google AI SDK is not available
+    this.mockMode = (config as any).mockMode === true || !GoogleGenerativeAI;
 
     // Initialize Google AI client if not in mock mode
-    if (!this.mockMode && GoogleGenerativeAI) {
+    if (!this.mockMode && GoogleGenerativeAI && config.apiKey) {
       try {
         this.client = new GoogleGenerativeAI(config.apiKey);
       } catch (error) {
-        console.warn('Failed to initialize Google AI client, falling back to mock mode:', error);
-        this.mockMode = true;
+        console.warn('Failed to initialize Google AI client:', error);
+        this.client = null;
       }
     }
   }

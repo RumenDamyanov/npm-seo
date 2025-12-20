@@ -27,6 +27,26 @@ export abstract class BaseSchema {
   abstract getType(): string;
 
   /**
+   * Set the @id property (unique identifier for the schema)
+   *
+   * @param id - Unique identifier URL
+   * @returns This instance for chaining
+   */
+  setId(id: string): this {
+    return this.setProperty('@id', id);
+  }
+
+  /**
+   * Set the name property
+   *
+   * @param name - Name/title
+   * @returns This instance for chaining
+   */
+  setName(name: string): this {
+    return this.setProperty('name', name);
+  }
+
+  /**
    * Convert schema to JSON-LD format
    *
    * @returns JSON-LD structured data object
@@ -38,6 +58,15 @@ export abstract class BaseSchema {
       ...this.data,
       '@type': this.getType(),
     } as JsonLdData;
+  }
+
+  /**
+   * Alias for toJsonLd() for API consistency
+   *
+   * @returns JSON-LD structured data object
+   */
+  toJson(): JsonLdData {
+    return this.toJsonLd();
   }
 
   /**

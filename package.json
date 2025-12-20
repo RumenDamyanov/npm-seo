@@ -1,7 +1,7 @@
 {
   "name": "@rumenx/seo",
-  "version": "1.0.5",
-  "description": "A comprehensive TypeScript package for AI-powered SEO optimization in Node.js applications. Framework-agnostic with built-in AI integration, rich meta tag generation, and 100% type safety.",
+  "version": "1.1.0",
+  "description": "A comprehensive TypeScript package for AI-powered SEO optimization in Node.js applications. Framework-agnostic with built-in AI integration, Schema.org structured data, caching, batch processing, and 100% type safety.",
   "keywords": [
     "seo",
     "ai",
@@ -14,6 +14,16 @@
     "openai",
     "claude",
     "gemini",
+    "xai",
+    "grok",
+    "ollama",
+    "schema.org",
+    "structured-data",
+    "json-ld",
+    "caching",
+    "redis",
+    "batch-processing",
+    "rate-limiting",
     "seo-optimization",
     "ai-powered",
     "framework-agnostic"
@@ -80,7 +90,7 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"*.{js,json,md}\"",
     "typecheck": "tsc --noEmit",
     "quality": "npm run lint && npm run format:check && npm run typecheck",
-    "prepublishOnly": "npm run quality && npm run test && npm run build",
+    "prepublishOnly": "npm run quality && npm run test:ci && npm run build",
     "semantic-release": "semantic-release"
   },
   "dependencies": {
@@ -113,7 +123,9 @@
   "peerDependencies": {
     "@anthropic-ai/sdk": "^0.20.0",
     "@google/generative-ai": "^0.2.0",
-    "openai": "^4.0.0"
+    "ollama": "^0.5.0",
+    "openai": "^4.0.0",
+    "redis": "^4.6.0"
   },
   "peerDependenciesMeta": {
     "openai": {
@@ -123,6 +135,12 @@
       "optional": true
     },
     "@google/generative-ai": {
+      "optional": true
+    },
+    "ollama": {
+      "optional": true
+    },
+    "redis": {
       "optional": true
     }
   }

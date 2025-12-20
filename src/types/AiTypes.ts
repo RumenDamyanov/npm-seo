@@ -210,7 +210,9 @@ export interface XAiConfig {
  */
 export interface OllamaConfig {
   /** Ollama API URL */
-  apiUrl: string;
+  apiUrl?: string;
+  /** Alias for apiUrl (for consistency with other providers) */
+  baseUrl?: string;
   /** Model to use */
   model: string;
   /** Request timeout in milliseconds */

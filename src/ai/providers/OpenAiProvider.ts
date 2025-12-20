@@ -58,18 +58,19 @@ export class OpenAiProvider extends BaseAiProvider {
   constructor(config: OpenAiConfig) {
     super();
     this.config = config;
-    this.mockMode = (config as any).mockMode === true || !OpenAI || !config.apiKey;
+    // Only enable mock mode if explicitly requested or if OpenAI SDK is not available
+    this.mockMode = (config as any).mockMode === true || !OpenAI;
 
     // Initialize OpenAI client if not in mock mode
-    if (!this.mockMode && OpenAI) {
+    if (!this.mockMode && OpenAI && config.apiKey) {
       try {
         this.client = new OpenAI({
           apiKey: config.apiKey,
           ...(config.organization && { organization: config.organization }),
         });
       } catch (error) {
-        console.warn('Failed to initialize OpenAI client, falling back to mock mode:', error);
-        this.mockMode = true;
+        console.warn('Failed to initialize OpenAI client:', error);
+        this.client = null;
       }
     }
   }

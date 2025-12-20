@@ -73,9 +73,13 @@ export class SeoManager {
    * @param content - HTML content to analyze
    * @param metadata - Additional metadata
    * @param options - Analysis options
-   * @returns This instance for chaining (fluent interface)
+   * @returns SEO analysis result
    */
-  analyze(content: string, metadata: ContentMetadata = {}, options: { fast?: boolean } = {}): this {
+  analyze(
+    content: string,
+    metadata: ContentMetadata = {},
+    options: { fast?: boolean } = {}
+  ): SeoResult {
     const startTime = Date.now();
 
     // Analyze content
@@ -107,7 +111,7 @@ export class SeoManager {
       },
     };
 
-    return this; // Return this for chaining
+    return this.lastSeoResult; // Return result directly for backward compatibility
   }
 
   /**
@@ -565,7 +569,7 @@ export class SeoManager {
     switch (type) {
       case 'title':
         return `${basePrompt}
-        
+
 Keywords: ${analysis.keywords.slice(0, 5).join(', ')}
 Current title: ${analysis.seoMetrics.titleTag ?? 'None'}
 
@@ -573,7 +577,7 @@ Generate 3-5 compelling, SEO-friendly titles (30-60 characters each) that incorp
 
       case 'description':
         return `${basePrompt}
-        
+
 Keywords: ${analysis.keywords.slice(0, 5).join(', ')}
 Current description: ${analysis.seoMetrics.metaDescription ?? 'None'}
 Content summary: ${analysis.textContent.substring(0, 200)}...
@@ -582,7 +586,7 @@ Generate 3-5 engaging meta descriptions (120-160 characters each) that summarize
 
       case 'keywords':
         return `${basePrompt}
-        
+
 Current keywords: ${analysis.keywords.join(', ')}
 Content: ${analysis.textContent.substring(0, 500)}...
 
@@ -590,7 +594,7 @@ Generate 10-15 relevant SEO keywords and phrases that would help this content ra
 
       case 'content':
         return `${basePrompt}
-        
+
 Title: ${analysis.seoMetrics.titleTag}
 Keywords: ${analysis.keywords.slice(0, 5).join(', ')}
 Current headings: ${analysis.structure.headings.map(h => h.text).join(', ')}

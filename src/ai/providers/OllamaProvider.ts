@@ -47,7 +47,11 @@ export class OllamaProvider extends BaseAiProvider {
 
   constructor(config: OllamaConfig) {
     super();
-    this.config = config;
+    // Normalize config: use baseUrl as alias for apiUrl
+    this.config = {
+      ...config,
+      apiUrl: config.apiUrl || config.baseUrl || 'http://localhost:11434',
+    };
     this.mockMode = (config as any).mockMode === true;
   }
 
