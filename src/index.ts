@@ -12,6 +12,7 @@ export {
   OpenAiProvider,
   AnthropicProvider,
   GoogleAiProvider,
+  XAiProvider,
   OllamaProvider,
   AiProviderFactory,
 } from './ai';

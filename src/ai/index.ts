@@ -9,6 +9,7 @@ export { BaseAiProvider } from './BaseAiProvider';
 export { OpenAiProvider } from './providers/OpenAiProvider';
 export { AnthropicProvider } from './providers/AnthropicProvider';
 export { GoogleAiProvider } from './providers/GoogleAiProvider';
+export { XAiProvider } from './providers/XAiProvider';
 export { OllamaProvider } from './providers/OllamaProvider';
 
 // Provider factory
@@ -24,6 +25,7 @@ export type {
   OpenAiConfig,
   AnthropicConfig,
   GoogleAiConfig,
+  XAiConfig,
   OllamaConfig,
   AiProviderFactoryConfig,
   AiPromptTemplates,

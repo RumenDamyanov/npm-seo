@@ -6,9 +6,34 @@ import type {
   OpenAiConfig,
 } from '../../types/AiTypes';
 
+// Lazy import OpenAI to avoid requiring it when not needed
+let OpenAI: any;
+try {
+  OpenAI = require('openai').default || require('openai');
+} catch {
+  // OpenAI not installed, will use mock mode
+  OpenAI = null;
+}
+
 /**
- * OpenAI provider implementation
- * Currently uses mock responses for development
+ * OpenAI provider implementation with real API integration
+ * 
+ * Supports both real API calls and mock mode for testing
+ * 
+ * @example
+ * ```typescript
+ * // Real API mode
+ * const provider = new OpenAiProvider({
+ *   apiKey: process.env.OPENAI_API_KEY,
+ *   model: 'gpt-4.1-turbo',
+ * });
+ * 
+ * // Mock mode (for testing)
+ * const provider = new OpenAiProvider({
+ *   apiKey: 'mock-key',
+ *   mockMode: true,
+ * });
+ * ```
  */
 export class OpenAiProvider extends BaseAiProvider {
   public readonly name = 'openai';
@@ -25,11 +50,28 @@ export class OpenAiProvider extends BaseAiProvider {
       requestsPerDay: 1000,
     },
   };
+  
   private config: OpenAiConfig;
+  private client: any | null = null;
+  private mockMode: boolean;
 
   constructor(config: OpenAiConfig) {
     super();
     this.config = config;
+    this.mockMode = (config as any).mockMode === true || !OpenAI || !config.apiKey;
+    
+    // Initialize OpenAI client if not in mock mode
+    if (!this.mockMode && OpenAI) {
+      try {
+        this.client = new OpenAI({
+          apiKey: config.apiKey,
+          ...(config.organization && { organization: config.organization }),
+        });
+      } catch (error) {
+        console.warn('Failed to initialize OpenAI client, falling back to mock mode:', error);
+        this.mockMode = true;
+      }
+    }
   }
 
   /**
@@ -44,21 +86,107 @@ export class OpenAiProvider extends BaseAiProvider {
   /**
    * Check if OpenAI is available
    */
-  isAvailable(): Promise<boolean> {
-    return Promise.resolve(Boolean(this.config.apiKey));
+  async isAvailable(): Promise<boolean> {
+    if (this.mockMode) {
+      return true; // Mock mode is always available
+    }
+    
+    if (!this.client) {
+      return false;
+    }
+    
+    try {
+      // Test API by listing models
+      await this.client.models.list();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
    * Generate content using OpenAI
+   * 
+   * Automatically uses mock mode if:
+   * - OpenAI SDK not installed
+   * - No API key provided
+   * - mockMode explicitly enabled
+   * 
+   * @throws {Error} If API call fails (not in mock mode)
    */
-  generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
+  async generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
     const startTime = Date.now();
 
+    // Use mock mode if configured or client not available
+    if (this.mockMode || !this.client) {
+      return this.generateMock(request, startTime);
+    }
+
+    try {
+      // Real OpenAI API call
+      const completion = await this.client.chat.completions.create({
+        model: this.getModelName(),
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an SEO expert assistant helping to optimize web content.',
+          },
+          {
+            role: 'user',
+            content: request.prompt,
+          },
+        ],
+        max_tokens: request.maxTokens ?? 500,
+        temperature: request.temperature ?? 0.7,
+        n: 1,
+      });
+
+      const processingTime = Date.now() - startTime;
+      const content = completion.choices[0]?.message?.content ?? '';
+      const alternatives = this.extractAlternatives(content);
+
+      return {
+        content,
+        alternatives: alternatives ?? [],
+        usage: {
+          promptTokens: completion.usage?.prompt_tokens ?? 0,
+          completionTokens: completion.usage?.completion_tokens ?? 0,
+          totalTokens: completion.usage?.total_tokens ?? 0,
+        },
+        meta: {
+          model: completion.model,
+          provider: this.name,
+          generatedAt: new Date(),
+          processingTime,
+        },
+      };
+    } catch (error: any) {
+      // Handle specific OpenAI errors
+      if (error.status === 401) {
+        throw new Error('OpenAI API key is invalid');
+      } else if (error.status === 429) {
+        throw new Error('OpenAI rate limit exceeded. Please try again later.');
+      } else if (error.status === 500 || error.status === 503) {
+        throw new Error('OpenAI service is temporarily unavailable');
+      }
+      
+      throw new Error(`OpenAI API error: ${error.message || 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Generate mock response for testing
+   * @private
+   */
+  private generateMock(
+    request: AiGenerationRequest,
+    startTime: number
+  ): AiGenerationResponse {
     const content = this.generateMockResponse(request);
     const processingTime = Date.now() - startTime;
     const alternatives = this.extractAlternatives(content);
 
-    return Promise.resolve({
+    return {
       content,
       alternatives: alternatives ?? [],
       usage: {
@@ -67,12 +195,12 @@ export class OpenAiProvider extends BaseAiProvider {
         totalTokens: Math.ceil((request.prompt.length + content.length) / 4),
       },
       meta: {
-        model: this.getModelName(),
+        model: this.getModelName() + ' (mock)',
         provider: this.name,
         generatedAt: new Date(),
         processingTime,
       },
-    });
+    };
   }
 
   /**
@@ -85,21 +213,25 @@ export class OpenAiProvider extends BaseAiProvider {
   /**
    * Get provider status and health
    */
-  override getStatus(): Promise<{
+  override async getStatus(): Promise<{
     available: boolean;
     model: string;
     version?: string;
+    mockMode?: boolean;
     usage?: {
       current: number;
       limit: number;
       resetAt?: Date;
     };
   }> {
-    return Promise.resolve({
-      available: Boolean(this.config.apiKey),
+    const available = await this.isAvailable();
+    
+    return {
+      available,
       model: this.getModelName(),
-      version: '1.0.0',
-    });
+      version: this.getVersion(),
+      mockMode: this.mockMode,
+    };
   }
 
   /**

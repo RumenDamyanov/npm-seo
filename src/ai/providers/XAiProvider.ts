@@ -3,71 +3,74 @@ import type {
   AiGenerationRequest,
   AiGenerationResponse,
   AiProviderCapabilities,
-  AnthropicConfig,
+  XAiConfig,
 } from '../../types/AiTypes';
 
-// Lazy import Anthropic to avoid requiring it when not needed
-let Anthropic: any;
+// Lazy import for xAI SDK (when available)
+// Currently xAI uses OpenAI-compatible API
+let OpenAI: any;
 try {
-  Anthropic = require('@anthropic-ai/sdk').default || require('@anthropic-ai/sdk');
+  OpenAI = require('openai').default || require('openai');
 } catch {
-  // Anthropic SDK not installed, will use mock mode
-  Anthropic = null;
+  // OpenAI SDK not installed, will use mock mode
+  OpenAI = null;
 }
 
 /**
- * Anthropic AI provider implementation with real API integration
+ * xAI provider implementation for Grok models
  * 
- * Supports Claude 4 models with real API calls and mock mode for testing
+ * xAI uses an OpenAI-compatible API, so we use the OpenAI SDK
+ * with a custom base URL
  * 
  * @example
  * ```typescript
  * // Real API mode
- * const provider = new AnthropicProvider({
- *   apiKey: process.env.ANTHROPIC_API_KEY,
- *   model: 'claude-4-sonnet-20250101',
+ * const provider = new XAiProvider({
+ *   apiKey: process.env.XAI_API_KEY,
+ *   model: 'grok-2-latest',
  * });
  * 
  * // Mock mode (for testing)
- * const provider = new AnthropicProvider({
+ * const provider = new XAiProvider({
  *   apiKey: 'mock-key',
  *   mockMode: true,
  * });
  * ```
  */
-export class AnthropicProvider extends BaseAiProvider {
-  public readonly name = 'anthropic';
+export class XAiProvider extends BaseAiProvider {
+  public readonly name = 'xai';
   public readonly capabilities: AiProviderCapabilities = {
-    maxInputTokens: 200000,
-    maxOutputTokens: 8192,
+    maxInputTokens: 128000,
+    maxOutputTokens: 4096,
     supportedLanguages: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'],
-    supportsImageAnalysis: true,
+    supportsImageAnalysis: false, // Grok doesn't support images yet
     supportsStreaming: true,
     supportsFunctionCalling: true,
     rateLimits: {
-      requestsPerMinute: 50,
-      tokensPerMinute: 100000,
+      requestsPerMinute: 60,
+      tokensPerMinute: 150000,
       requestsPerDay: 1000,
     },
   };
   
-  private config: AnthropicConfig;
+  private config: XAiConfig;
   private client: any | null = null;
   private mockMode: boolean;
 
-  constructor(config: AnthropicConfig) {
+  constructor(config: XAiConfig) {
     super();
     this.config = config;
-    this.mockMode = (config as any).mockMode === true || !Anthropic || !config.apiKey;
+    this.mockMode = (config as any).mockMode === true || !OpenAI || !config.apiKey;
     
-    // Initialize Anthropic client if not in mock mode
-    if (!this.mockMode && Anthropic) {
+    // Initialize xAI client (using OpenAI SDK with custom base URL)
+    if (!this.mockMode && OpenAI) {
       try {
-        this.client = new Anthropic({
+        this.client = new OpenAI({
           apiKey: config.apiKey,
+          baseURL: config.baseUrl || 'https://api.x.ai/v1',
         });
       } catch (error) {
-        console.warn('Failed to initialize Anthropic client, falling back to mock mode:', error);
+        console.warn('Failed to initialize xAI client, falling back to mock mode:', error);
         this.mockMode = true;
       }
     }
@@ -75,11 +78,11 @@ export class AnthropicProvider extends BaseAiProvider {
 
   /**
    * Get the model name for this provider
-   * Updated to Claude 4 Sonnet (2025) - balanced performance and cost
-   * Alternatives: claude-4-opus-20250101 (most capable), claude-4-haiku-20250101 (fastest)
+   * Default to Grok-2 (latest stable model)
+   * Alternatives: grok-2-mini (faster, cheaper)
    */
   protected getModelName(): string {
-    return this.config.model ?? 'claude-4-sonnet-20250101';
+    return this.config.model ?? 'grok-2-latest';
   }
 
   /**
@@ -90,7 +93,7 @@ export class AnthropicProvider extends BaseAiProvider {
   }
 
   /**
-   * Check if Anthropic is available
+   * Check if xAI is available
    */
   async isAvailable(): Promise<boolean> {
     if (this.mockMode) {
@@ -101,15 +104,20 @@ export class AnthropicProvider extends BaseAiProvider {
       return false;
     }
     
-    // Anthropic doesn't have a simple health check, so we just verify client exists
-    return true;
+    try {
+      // Test API by listing models
+      await this.client.models.list();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
-   * Generate content using Anthropic Claude
+   * Generate content using xAI Grok
    * 
    * Automatically uses mock mode if:
-   * - Anthropic SDK not installed
+   * - OpenAI SDK not installed
    * - No API key provided
    * - mockMode explicitly enabled
    * 
@@ -124,50 +132,54 @@ export class AnthropicProvider extends BaseAiProvider {
     }
 
     try {
-      // Real Anthropic API call
-      const message = await this.client.messages.create({
+      // Real xAI API call (using OpenAI-compatible endpoint)
+      const completion = await this.client.chat.completions.create({
         model: this.getModelName(),
-        max_tokens: request.maxTokens ?? 1024,
-        temperature: request.temperature ?? 0.7,
         messages: [
+          {
+            role: 'system',
+            content: 'You are Grok, an AI assistant by xAI. You are helpful, witty, and provide excellent SEO advice.',
+          },
           {
             role: 'user',
             content: request.prompt,
           },
         ],
+        max_tokens: request.maxTokens ?? 500,
+        temperature: request.temperature ?? 0.7,
+        n: 1,
       });
 
       const processingTime = Date.now() - startTime;
-      const content = message.content[0]?.text ?? '';
+      const content = completion.choices[0]?.message?.content ?? '';
       const alternatives = this.extractAlternatives(content);
 
       return {
         content,
         alternatives: alternatives ?? [],
         usage: {
-          promptTokens: message.usage?.input_tokens ?? 0,
-          completionTokens: message.usage?.output_tokens ?? 0,
-          totalTokens: (message.usage?.input_tokens ?? 0) + (message.usage?.output_tokens ?? 0),
+          promptTokens: completion.usage?.prompt_tokens ?? 0,
+          completionTokens: completion.usage?.completion_tokens ?? 0,
+          totalTokens: completion.usage?.total_tokens ?? 0,
         },
         meta: {
-          model: message.model,
+          model: completion.model,
           provider: this.name,
           generatedAt: new Date(),
           processingTime,
-          requestId: message.id,
         },
       };
     } catch (error: any) {
-      // Handle specific Anthropic errors
+      // Handle specific xAI errors
       if (error.status === 401) {
-        throw new Error('Anthropic API key is invalid');
+        throw new Error('xAI API key is invalid');
       } else if (error.status === 429) {
-        throw new Error('Anthropic rate limit exceeded. Please try again later.');
-      } else if (error.status === 500 || error.status === 529) {
-        throw new Error('Anthropic service is temporarily unavailable');
+        throw new Error('xAI rate limit exceeded. Please try again later.');
+      } else if (error.status === 500 || error.status === 503) {
+        throw new Error('xAI service is temporarily unavailable');
       }
       
-      throw new Error(`Anthropic API error: ${error.message || 'Unknown error'}`);
+      throw new Error(`xAI API error: ${error.message || 'Unknown error'}`);
     }
   }
 
@@ -226,23 +238,25 @@ export class AnthropicProvider extends BaseAiProvider {
 
   /**
    * Generate mock response for development/testing
+   * @private
    */
   private generateMockResponse(request: AiGenerationRequest): string {
     // Generate appropriate mock content based on prompt
     if (request.prompt.includes('title')) {
-      return 'Advanced SEO Strategies: Complete Guide to Search Engine Dominance';
+      return 'Grok\'s Guide to SEO: Witty Strategies for Search Domination';
     }
     if (request.prompt.includes('description')) {
-      return 'Master advanced SEO techniques with our comprehensive guide covering technical optimization, content strategy, and proven tactics for achieving search engine dominance.';
+      return 'Discover Grok\'s unique take on SEO optimization. Learn witty, effective strategies that actually work for improving your search engine rankings.';
     }
     if (request.prompt.includes('keywords')) {
-      return 'advanced SEO, search engine optimization, technical SEO, content strategy, search rankings, organic traffic';
+      return 'SEO strategies, search domination, Grok AI, witty optimization, search rankings, xAI';
     }
-    return 'Mock Claude-generated content for SEO optimization';
+    return 'Mock Grok-generated content for SEO optimization';
   }
 
   /**
    * Extract alternatives from response content
+   * @protected
    */
   protected extractAlternatives(content: string): string[] | undefined {
     // Look for numbered lists
@@ -272,3 +286,4 @@ export class AnthropicProvider extends BaseAiProvider {
     return undefined;
   }
 }
+
