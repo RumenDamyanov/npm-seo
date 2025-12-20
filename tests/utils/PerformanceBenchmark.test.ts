@@ -375,7 +375,7 @@ describe('PerformanceBenchmark', () => {
 
     it('should capture errors in async stress test', async () => {
       let callCount = 0;
-      // eslint-disable-next-line @typescript-eslint/require-await
+
       const testFn = async (): Promise<void> => {
         callCount++;
         if (callCount === 2) {
@@ -398,7 +398,6 @@ describe('PerformanceBenchmark', () => {
     });
 
     it('should handle async non-Error exceptions', async () => {
-      // eslint-disable-next-line @typescript-eslint/require-await
       const testFn = async (): Promise<void> => {
         throw new Error('Async string error');
       };
@@ -509,7 +508,6 @@ describe('PerformanceBenchmark', () => {
     });
 
     it('should handle async functions that reject in benchmark', async () => {
-      // eslint-disable-next-line @typescript-eslint/require-await
       const rejectFn = async (): Promise<void> => {
         throw new Error('Async error');
       };

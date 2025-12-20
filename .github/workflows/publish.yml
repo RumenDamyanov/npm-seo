@@ -8,11 +8,11 @@ jobs:
   publish:
     name: Publish Package
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: write
       id-token: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -32,7 +32,7 @@ jobs:
           npm run lint
           npm run format:check
           npm run typecheck
-          npm run test:coverage
+          npm run test:ci
           npm run build
 
       - name: Verify package can be packed

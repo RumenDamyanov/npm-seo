@@ -39,11 +39,25 @@ interface SeoResult {
 
 /**
  * Main SEO manager for content analysis and optimization
+ *
+ * Supports fluent interface for method chaining
+ *
+ * @example
+ * ```typescript
+ * // Fluent interface usage
+ * const seo = new SeoManager(config);
+ * const title = seo.analyze(content).generateTitle();
+ *
+ * // Generate all SEO data at once
+ * const seoData = seo.analyze(content).generateAll();
+ * ```
  */
 export class SeoManager {
   private config: SeoConfig;
   private contentAnalyzer: ContentAnalyzer;
   private aiProvider: IAiProvider | undefined;
+  private lastAnalysis: ContentAnalysis | null = null;
+  private lastSeoResult: SeoResult | null = null;
 
   constructor(config: SeoConfig, aiProvider?: IAiProvider) {
     this.config = config;
@@ -53,6 +67,13 @@ export class SeoManager {
 
   /**
    * Analyze content and generate SEO recommendations
+   *
+   * Stores analysis result for use with fluent interface methods
+   *
+   * @param content - HTML content to analyze
+   * @param metadata - Additional metadata
+   * @param options - Analysis options
+   * @returns SEO analysis result
    */
   analyze(
     content: string,
@@ -66,6 +87,9 @@ export class SeoManager {
       ? this.contentAnalyzer.analyzeFast(content, metadata)
       : this.contentAnalyzer.analyze(content, metadata);
 
+    // Store analysis for fluent interface
+    this.lastAnalysis = analysis;
+
     // Generate recommendations
     const recommendations = this.generateRecommendations(analysis, metadata);
 
@@ -74,7 +98,8 @@ export class SeoManager {
 
     const processingTime = Date.now() - startTime;
 
-    return {
+    // Store result
+    this.lastSeoResult = {
       analysis,
       recommendations,
       score,
@@ -85,6 +110,26 @@ export class SeoManager {
         config: this.config,
       },
     };
+
+    return this.lastSeoResult; // Return result directly for backward compatibility
+  }
+
+  /**
+   * Get the last analysis result
+   *
+   * @returns Last SEO result or null if no analysis performed
+   */
+  getResult(): SeoResult | null {
+    return this.lastSeoResult;
+  }
+
+  /**
+   * Get the last content analysis
+   *
+   * @returns Last content analysis or null
+   */
+  getAnalysis(): ContentAnalysis | null {
+    return this.lastAnalysis;
   }
 
   /**
@@ -119,18 +164,166 @@ export class SeoManager {
   }
 
   /**
-   * Update configuration
+   * Generate optimized title based on analysis
+   *
+   * @param maxLength - Maximum title length (default: 60)
+   * @returns Generated title
+   * @throws {Error} If no analysis has been performed
    */
-  updateConfig(newConfig: Partial<SeoConfig>): void {
-    this.config = { ...this.config, ...newConfig };
-    this.contentAnalyzer = new ContentAnalyzer(this.config.baseUrl);
+  generateTitle(maxLength: number = 60): string {
+    if (!this.lastAnalysis) {
+      throw new Error('Must call analyze() before generating title');
+    }
+
+    const { keywords, seoMetrics } = this.lastAnalysis;
+    const currentTitle = seoMetrics.titleTag;
+
+    // If current title is good, optimize it
+    if (currentTitle && currentTitle.length >= 30 && currentTitle.length <= 60) {
+      return currentTitle;
+    }
+
+    // Generate title from keywords
+    const topKeywords = keywords.slice(0, 3);
+    let title = topKeywords.join(' | ');
+
+    // Truncate if too long
+    if (title.length > maxLength) {
+      title = `${title.substring(0, maxLength - 3)}...`;
+    }
+
+    return title;
   }
 
   /**
-   * Set AI provider
+   * Generate optimized meta description based on analysis
+   *
+   * @param maxLength - Maximum description length (default: 160)
+   * @returns Generated description
+   * @throws {Error} If no analysis has been performed
    */
-  setAiProvider(provider: IAiProvider): void {
+  generateDescription(maxLength: number = 160): string {
+    if (!this.lastAnalysis) {
+      throw new Error('Must call analyze() before generating description');
+    }
+
+    const { textContent, keywords, seoMetrics } = this.lastAnalysis;
+    const currentDescription = seoMetrics.metaDescription;
+
+    // If current description is good, use it
+    if (
+      currentDescription &&
+      currentDescription.length >= 120 &&
+      currentDescription.length <= 160
+    ) {
+      return currentDescription;
+    }
+
+    // Generate from content
+    let description = `${textContent.substring(0, maxLength - 3)}...`;
+
+    // Try to end at a sentence
+    const lastPeriod = description.lastIndexOf('.');
+    if (lastPeriod > maxLength / 2) {
+      description = description.substring(0, lastPeriod + 1);
+    }
+
+    // Add keywords if space allows
+    if (description.length < maxLength - 20) {
+      const keywordPhrase = ` Keywords: ${keywords.slice(0, 2).join(', ')}.`;
+      if (description.length + keywordPhrase.length <= maxLength) {
+        description += keywordPhrase;
+      }
+    }
+
+    return description;
+  }
+
+  /**
+   * Generate keywords array based on analysis
+   *
+   * @param maxKeywords - Maximum number of keywords (default: 10)
+   * @returns Array of keywords
+   * @throws {Error} If no analysis has been performed
+   */
+  generateKeywords(maxKeywords: number = 10): string[] {
+    if (!this.lastAnalysis) {
+      throw new Error('Must call analyze() before generating keywords');
+    }
+
+    return this.lastAnalysis.keywords.slice(0, maxKeywords);
+  }
+
+  /**
+   * Generate all SEO data at once
+   *
+   * Generates title, description, keywords, and returns recommendations and score
+   *
+   * @returns Complete SEO data
+   * @throws {Error} If no analysis has been performed
+   *
+   * @example
+   * ```typescript
+   * const seo = new SeoManager(config);
+   * const seoData = seo.analyze(content).generateAll();
+   *
+   * console.log(seoData.title);
+   * console.log(seoData.description);
+   * console.log(seoData.keywords);
+   * ```
+   */
+  generateAll(): {
+    title: string;
+    description: string;
+    keywords: string[];
+    recommendations: SeoRecommendation[];
+    score: {
+      overall: number;
+      breakdown: Record<string, number>;
+    };
+    analysis: ContentAnalysis;
+    meta: {
+      analyzedAt: Date;
+      processingTime: number;
+      version: string;
+    };
+  } {
+    if (!this.lastSeoResult || !this.lastAnalysis) {
+      throw new Error('Must call analyze() before generateAll()');
+    }
+
+    return {
+      title: this.generateTitle(),
+      description: this.generateDescription(),
+      keywords: this.generateKeywords(),
+      recommendations: this.lastSeoResult.recommendations,
+      score: this.lastSeoResult.score,
+      analysis: this.lastAnalysis,
+      meta: this.lastSeoResult.meta,
+    };
+  }
+
+  /**
+   * Update configuration (fluent interface)
+   *
+   * @param newConfig - Partial configuration to merge
+   * @returns This instance for chaining
+   */
+  updateConfig(newConfig: Partial<SeoConfig>): this {
+    this.config = { ...this.config, ...newConfig };
+    this.contentAnalyzer = new ContentAnalyzer(this.config.baseUrl);
+    return this;
+  }
+
+  /**
+   * Set AI provider (fluent interface)
+   *
+   * @param provider - AI provider instance
+   * @returns This instance for chaining
+   */
+  setAiProvider(provider: IAiProvider): this {
     this.aiProvider = provider;
+    return this;
   }
 
   /**
@@ -376,7 +569,7 @@ export class SeoManager {
     switch (type) {
       case 'title':
         return `${basePrompt}
-        
+
 Keywords: ${analysis.keywords.slice(0, 5).join(', ')}
 Current title: ${analysis.seoMetrics.titleTag ?? 'None'}
 
@@ -384,7 +577,7 @@ Generate 3-5 compelling, SEO-friendly titles (30-60 characters each) that incorp
 
       case 'description':
         return `${basePrompt}
-        
+
 Keywords: ${analysis.keywords.slice(0, 5).join(', ')}
 Current description: ${analysis.seoMetrics.metaDescription ?? 'None'}
 Content summary: ${analysis.textContent.substring(0, 200)}...
@@ -393,7 +586,7 @@ Generate 3-5 engaging meta descriptions (120-160 characters each) that summarize
 
       case 'keywords':
         return `${basePrompt}
-        
+
 Current keywords: ${analysis.keywords.join(', ')}
 Content: ${analysis.textContent.substring(0, 500)}...
 
@@ -401,7 +594,7 @@ Generate 10-15 relevant SEO keywords and phrases that would help this content ra
 
       case 'content':
         return `${basePrompt}
-        
+
 Title: ${analysis.seoMetrics.titleTag}
 Keywords: ${analysis.keywords.slice(0, 5).join(', ')}
 Current headings: ${analysis.structure.headings.map(h => h.text).join(', ')}
@@ -460,5 +653,203 @@ Generate ${options.contentLength ?? 'additional'} content suggestions that would
       default:
         return [];
     }
+  }
+
+  /**
+   * Analyze multiple documents in batch
+   *
+   * Efficiently processes multiple HTML documents and returns SEO analysis for each
+   *
+   * @param documents - Array of documents to analyze
+   * @param options - Batch processing options
+   * @returns Array of SEO results
+   *
+   * @example
+   * ```typescript
+   * const seoManager = new SeoManager(config);
+   * const documents = [
+   *   { id: '1', content: htmlContent1, metadata: { title: 'Page 1' } },
+   *   { id: '2', content: htmlContent2, metadata: { title: 'Page 2' } }
+   * ];
+   * const results = await seoManager.analyzeBatch(documents);
+   * ```
+   */
+  async analyzeBatch(
+    documents: Array<{
+      id: string;
+      content: string;
+      metadata?: ContentMetadata;
+    }>,
+    options: {
+      fast?: boolean;
+      concurrency?: number;
+      onProgress?: (completed: number, total: number) => void;
+    } = {}
+  ): Promise<
+    Array<{
+      id: string;
+      result: SeoResult;
+      error?: Error;
+    }>
+  > {
+    const concurrency = options.concurrency ?? 5;
+    const results: Array<{
+      id: string;
+      result: SeoResult;
+      error?: Error;
+    }> = [];
+    let completed = 0;
+
+    // Process in chunks
+    for (let i = 0; i < documents.length; i += concurrency) {
+      const chunk = documents.slice(i, i + concurrency);
+      const chunkPromises = chunk.map(async doc => {
+        try {
+          // Analyze document
+          const analyzeOptions = options.fast !== undefined ? { fast: options.fast } : {};
+          this.analyze(doc.content, doc.metadata, analyzeOptions);
+          const result = this.getResult();
+
+          if (!result) {
+            throw new Error('Analysis failed to produce result');
+          }
+
+          completed++;
+          if (options.onProgress) {
+            options.onProgress(completed, documents.length);
+          }
+
+          return {
+            id: doc.id,
+            result,
+          };
+        } catch (error) {
+          completed++;
+          if (options.onProgress) {
+            options.onProgress(completed, documents.length);
+          }
+
+          return {
+            id: doc.id,
+            result: {
+              analysis: this.contentAnalyzer.analyze('', {}),
+              recommendations: [],
+              score: { overall: 0, breakdown: {} },
+              meta: {
+                analyzedAt: new Date(),
+                processingTime: 0,
+                version: '1.0.0',
+                config: this.config,
+              },
+            },
+            error: error instanceof Error ? error : new Error(String(error)),
+          };
+        }
+      });
+
+      const chunkResults = await Promise.all(chunkPromises);
+      results.push(...chunkResults);
+    }
+
+    return results;
+  }
+
+  /**
+   * Generate SEO data for multiple documents using AI
+   *
+   * Batch processes multiple documents and generates titles, descriptions, keywords for each
+   *
+   * @param documents - Array of analyzed documents
+   * @param options - Generation options
+   * @returns Map of document ID to generated SEO data
+   *
+   * @example
+   * ```typescript
+   * const seoManager = new SeoManager(config, aiProvider);
+   * const seoData = await seoManager.generateBatch(
+   *   [{ id: '1', analysis: analysis1 }, { id: '2', analysis: analysis2 }],
+   *   { types: ['title', 'description'] }
+   * );
+   * ```
+   */
+  async generateBatch(
+    documents: Array<{
+      id: string;
+      analysis: ContentAnalysis;
+    }>,
+    options: {
+      types?: Array<'title' | 'description' | 'keywords'>;
+      concurrency?: number;
+      onProgress?: (completed: number, total: number) => void;
+    } = {}
+  ): Promise<
+    Map<
+      string,
+      {
+        title?: string[];
+        description?: string[];
+        keywords?: string[];
+        error?: Error;
+      }
+    >
+  > {
+    if (!this.aiProvider) {
+      throw new Error('AI provider required for batch generation');
+    }
+
+    const types = options.types ?? ['title', 'description', 'keywords'];
+    const concurrency = options.concurrency ?? 3;
+    const results = new Map<
+      string,
+      {
+        title?: string[];
+        description?: string[];
+        keywords?: string[];
+        error?: Error;
+      }
+    >();
+
+    let completed = 0;
+
+    // Process in chunks
+    for (let i = 0; i < documents.length; i += concurrency) {
+      const chunk = documents.slice(i, i + concurrency);
+      const chunkPromises = chunk.map(async doc => {
+        const generatedData: {
+          title?: string[];
+          description?: string[];
+          keywords?: string[];
+          error?: Error;
+        } = {};
+
+        try {
+          // Generate for each type
+          for (const type of types) {
+            const suggestions = await this.generateSuggestions(doc.analysis, type);
+            generatedData[type] = suggestions;
+          }
+
+          completed++;
+          if (options.onProgress) {
+            options.onProgress(completed, documents.length);
+          }
+        } catch (error) {
+          generatedData.error = error instanceof Error ? error : new Error(String(error));
+          completed++;
+          if (options.onProgress) {
+            options.onProgress(completed, documents.length);
+          }
+        }
+
+        return { id: doc.id, data: generatedData };
+      });
+
+      const chunkResults = await Promise.all(chunkPromises);
+      for (const { id, data } of chunkResults) {
+        results.set(id, data);
+      }
+    }
+
+    return results;
   }
 }

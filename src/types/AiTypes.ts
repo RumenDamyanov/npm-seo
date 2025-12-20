@@ -142,15 +142,17 @@ export interface OpenAiConfig {
   /** OpenAI API key */
   apiKey: string;
   /** Organization ID */
-  organizationId?: string;
+  organization?: string;
   /** Base URL for API */
   baseUrl?: string;
-  /** Model to use */
+  /** Model to use (default: gpt-4.1-turbo) */
   model?: string;
-  /** Request timeout */
+  /** Request timeout in milliseconds */
   timeout?: number;
-  /** Maximum retries */
+  /** Maximum retries on failure */
   maxRetries?: number;
+  /** Use mock mode for testing (no real API calls) */
+  mockMode?: boolean;
 }
 
 /**
@@ -159,12 +161,14 @@ export interface OpenAiConfig {
 export interface AnthropicConfig {
   /** Anthropic API key */
   apiKey: string;
-  /** Model to use */
+  /** Model to use (default: claude-4-sonnet-20250101) */
   model?: string;
-  /** Request timeout */
+  /** Request timeout in milliseconds */
   timeout?: number;
-  /** Maximum retries */
+  /** Maximum retries on failure */
   maxRetries?: number;
+  /** Use mock mode for testing (no real API calls) */
+  mockMode?: boolean;
 }
 
 /**
@@ -173,12 +177,32 @@ export interface AnthropicConfig {
 export interface GoogleAiConfig {
   /** Google AI API key */
   apiKey: string;
-  /** Model to use */
+  /** Model to use (default: gemini-1.5-pro-latest) */
   model?: string;
-  /** Request timeout */
+  /** Request timeout in milliseconds */
   timeout?: number;
-  /** Maximum retries */
+  /** Maximum retries on failure */
   maxRetries?: number;
+  /** Use mock mode for testing (no real API calls) */
+  mockMode?: boolean;
+}
+
+/**
+ * xAI provider configuration (Grok models)
+ */
+export interface XAiConfig {
+  /** xAI API key */
+  apiKey: string;
+  /** Base URL for xAI API (default: https://api.x.ai/v1) */
+  baseUrl?: string;
+  /** Model to use (default: grok-2-latest) */
+  model?: string;
+  /** Request timeout in milliseconds */
+  timeout?: number;
+  /** Maximum retries on failure */
+  maxRetries?: number;
+  /** Use mock mode for testing (no real API calls) */
+  mockMode?: boolean;
 }
 
 /**
@@ -186,15 +210,19 @@ export interface GoogleAiConfig {
  */
 export interface OllamaConfig {
   /** Ollama API URL */
-  apiUrl: string;
+  apiUrl?: string;
+  /** Alias for apiUrl (for consistency with other providers) */
+  baseUrl?: string;
   /** Model to use */
   model: string;
-  /** Request timeout */
+  /** Request timeout in milliseconds */
   timeout?: number;
-  /** Maximum retries */
+  /** Maximum retries on failure */
   maxRetries?: number;
   /** Custom headers */
   headers?: Record<string, string>;
+  /** Use mock mode for testing (no real API calls) */
+  mockMode?: boolean;
 }
 
 /**

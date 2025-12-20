@@ -1,5 +1,8 @@
 # Internal development files
 .ai/
+.idea/
+.cursor/
+.cursorrules
 .vscode/
 
 # System files
@@ -18,6 +21,8 @@ coverage/
 
 # Internal wiki (keep private for now)
 wiki/
+
+# Documentation (keep in repo)
 docs/
 
 # Temporary files

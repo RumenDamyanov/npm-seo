@@ -7,28 +7,52 @@ import type {
 } from '../../types/AiTypes';
 
 /**
- * Ollama provider implementation
- * Currently uses mock responses for development
+ * Ollama provider implementation for local AI models
+ *
+ * Connects to local Ollama instance for running models like Llama, Qwen, Mistral, etc.
+ *
+ * @example
+ * ```typescript
+ * // Real API mode (local Ollama)
+ * const provider = new OllamaProvider({
+ *   apiUrl: 'http://localhost:11434',
+ *   model: 'llama3.3',
+ * });
+ *
+ * // Mock mode (for testing)
+ * const provider = new OllamaProvider({
+ *   apiUrl: 'http://localhost:11434',
+ *   model: 'llama3.3',
+ *   mockMode: true,
+ * });
+ * ```
  */
 export class OllamaProvider extends BaseAiProvider {
   public readonly name = 'ollama';
   public readonly capabilities: AiProviderCapabilities = {
-    maxInputTokens: 2048,
-    maxOutputTokens: 1024,
+    maxInputTokens: 8192, // Depends on model, but most support at least 8K
+    maxOutputTokens: 2048,
     supportedLanguages: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh'],
-    supportsImageAnalysis: false,
+    supportsImageAnalysis: false, // Some models support it, but not all
     supportsStreaming: true,
     supportsFunctionCalling: false,
     rateLimits: {
-      requestsPerMinute: 100,
-      tokensPerMinute: 10000,
+      requestsPerMinute: 1000, // No real rate limits for local
+      tokensPerMinute: 100000,
     },
   };
+
   private config: OllamaConfig;
+  private mockMode: boolean;
 
   constructor(config: OllamaConfig) {
     super();
-    this.config = config;
+    // Normalize config: use baseUrl as alias for apiUrl
+    this.config = {
+      ...config,
+      apiUrl: config.apiUrl || config.baseUrl || 'http://localhost:11434',
+    };
+    this.mockMode = (config as any).mockMode === true;
   }
 
   /**
@@ -48,22 +72,125 @@ export class OllamaProvider extends BaseAiProvider {
   /**
    * Check if Ollama is available
    */
-  isAvailable(): Promise<boolean> {
-    // For mock implementation, check if URL and model are configured
-    return Promise.resolve(Boolean(this.config.apiUrl && this.config.model));
+  async isAvailable(): Promise<boolean> {
+    if (this.mockMode) {
+      return true; // Mock mode is always available
+    }
+
+    if (!this.config.apiUrl || !this.config.model) {
+      return false;
+    }
+
+    try {
+      // Check if Ollama is running
+      const response = await fetch(`${this.config.apiUrl}/api/tags`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(this.config.timeout ?? 5000),
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data = await response.json();
+      // Check if the specified model is available
+      const models = data.models || [];
+      return models.some((m: any) => m.name.includes(this.config.model));
+    } catch {
+      return false;
+    }
   }
 
   /**
    * Generate content using Ollama
+   *
+   * Connects to local Ollama instance for generation
+   * Automatically uses mock mode if mockMode is enabled
+   *
+   * @throws {Error} If API call fails (not in mock mode)
    */
-  generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
+  async generate(request: AiGenerationRequest): Promise<AiGenerationResponse> {
     const startTime = Date.now();
 
+    // Use mock mode if configured
+    if (this.mockMode) {
+      return this.generateMock(request, startTime);
+    }
+
+    try {
+      // Real Ollama API call
+      const response = await fetch(`${this.config.apiUrl}/api/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.config.headers,
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          prompt: request.prompt,
+          stream: false, // We want the complete response
+          options: {
+            temperature: request.temperature ?? 0.7,
+            num_predict: request.maxTokens ?? 1024,
+          },
+        }),
+        signal: AbortSignal.timeout(this.config.timeout ?? 60000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const processingTime = Date.now() - startTime;
+      const content = data.response || '';
+      const alternatives = this.extractAlternatives(content);
+
+      return {
+        content,
+        alternatives: alternatives ?? [],
+        usage: {
+          promptTokens: data.prompt_eval_count ?? 0,
+          completionTokens: data.eval_count ?? 0,
+          totalTokens: (data.prompt_eval_count ?? 0) + (data.eval_count ?? 0),
+        },
+        meta: {
+          model: data.model || this.config.model,
+          provider: this.name,
+          generatedAt: new Date(),
+          processingTime,
+        },
+      };
+    } catch (error: any) {
+      // Handle Ollama-specific errors
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        throw new Error(
+          'Ollama request timed out. The model may be loading or the request is too complex.'
+        );
+      } else if (error.message?.includes('ECONNREFUSED')) {
+        throw new Error(
+          `Could not connect to Ollama. Make sure Ollama is running at ${this.config.apiUrl}`
+        );
+      } else if (error.message?.includes('model not found')) {
+        throw new Error(
+          `Model "${this.config.model}" not found. Pull it with: ollama pull ${this.config.model}`
+        );
+      }
+
+      throw new Error(`Ollama error: ${error.message || 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Generate mock response for testing
+   * @private
+   */
+  private generateMock(request: AiGenerationRequest, startTime: number): AiGenerationResponse {
     const content = this.generateMockResponse(request);
     const processingTime = Date.now() - startTime;
     const alternatives = this.extractAlternatives(content);
 
-    return Promise.resolve({
+    return {
       content,
       alternatives: alternatives ?? [],
       usage: {
@@ -72,32 +199,36 @@ export class OllamaProvider extends BaseAiProvider {
         totalTokens: Math.ceil((request.prompt.length + content.length) / 4),
       },
       meta: {
-        model: this.getModelName(),
+        model: `${this.getModelName()} (mock)`,
         provider: this.name,
         generatedAt: new Date(),
         processingTime,
       },
-    });
+    };
   }
 
   /**
    * Get provider status and health
    */
-  override getStatus(): Promise<{
+  override async getStatus(): Promise<{
     available: boolean;
     model: string;
     version?: string;
+    mockMode?: boolean;
     usage?: {
       current: number;
       limit: number;
       resetAt?: Date;
     };
   }> {
-    return Promise.resolve({
-      available: Boolean(this.config.apiUrl && this.config.model),
+    const available = await this.isAvailable();
+
+    return {
+      available,
       model: this.getModelName(),
       version: this.getVersion(),
-    });
+      mockMode: this.mockMode,
+    };
   }
 
   /**
