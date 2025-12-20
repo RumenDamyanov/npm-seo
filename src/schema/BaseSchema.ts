@@ -145,6 +145,7 @@ export abstract class BaseSchema {
    * @returns Schema data
    */
   getData(): Record<string, unknown> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { '@context': _context, ...rest } = this.data;
     return rest;
   }
@@ -155,8 +156,10 @@ export abstract class BaseSchema {
    * @returns New schema instance with same data
    */
   clone(): this {
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
     const cloned = Object.create(Object.getPrototypeOf(this));
     cloned.data = { ...this.data };
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
     return cloned;
   }
 }

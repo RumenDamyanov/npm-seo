@@ -165,7 +165,7 @@ export class OllamaProvider extends BaseAiProvider {
         );
       } else if (error.message?.includes('ECONNREFUSED')) {
         throw new Error(
-          'Could not connect to Ollama. Make sure Ollama is running at ' + this.config.apiUrl
+          `Could not connect to Ollama. Make sure Ollama is running at ${this.config.apiUrl}`
         );
       } else if (error.message?.includes('model not found')) {
         throw new Error(
@@ -195,7 +195,7 @@ export class OllamaProvider extends BaseAiProvider {
         totalTokens: Math.ceil((request.prompt.length + content.length) / 4),
       },
       meta: {
-        model: this.getModelName() + ' (mock)',
+        model: `${this.getModelName()} (mock)`,
         provider: this.name,
         generatedAt: new Date(),
         processingTime,

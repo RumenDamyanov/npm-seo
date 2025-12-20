@@ -202,7 +202,7 @@ export class XAiProvider extends BaseAiProvider {
         totalTokens: Math.ceil((request.prompt.length + content.length) / 4),
       },
       meta: {
-        model: this.getModelName() + ' (mock)',
+        model: `${this.getModelName()} (mock)`,
         provider: this.name,
         generatedAt: new Date(),
         processingTime,

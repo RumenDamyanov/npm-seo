@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { CacheInterface, CacheConfig, CacheEntry, CacheStats } from './CacheInterface';
+import type { CacheInterface, CacheConfig, CacheEntry, CacheStats } from './CacheInterface';
 
 /**
  * In-memory cache with LRU eviction

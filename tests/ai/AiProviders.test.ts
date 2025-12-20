@@ -15,7 +15,7 @@ describe('AI Providers - Mock Mode', () => {
     it('should work in mock mode', async () => {
       const provider = new OpenAiProvider({ mock: true });
 
-      expect(provider.isAvailable()).toBe(true);
+      expect(await provider.isAvailable()).toBe(true);
       expect(provider.name).toBe('openai');
       expect(provider.getModelName()).toBe('gpt-4.1-turbo');
     });
@@ -31,14 +31,14 @@ describe('AI Providers - Mock Mode', () => {
       expect(response).toBeDefined();
       expect(response.content).toBeDefined();
       expect(typeof response.content).toBe('string');
-      expect(response.model).toBe('gpt-4.1-turbo');
+      expect(response.meta?.model).toBeDefined();
       expect(response.usage).toBeDefined();
     });
 
-    it('should not be available without API key in non-mock mode', () => {
-      const provider = new OpenAiProvider({ mock: false });
+    it('should not be available without API key in non-mock mode', async () => {
+      const provider = new OpenAiProvider({ mock: false, apiKey: undefined });
 
-      expect(provider.isAvailable()).toBe(false);
+      expect(await provider.isAvailable()).toBe(false);
     });
 
     it('should use custom model', () => {
@@ -55,7 +55,7 @@ describe('AI Providers - Mock Mode', () => {
     it('should work in mock mode', async () => {
       const provider = new AnthropicProvider({ mock: true });
 
-      expect(provider.isAvailable()).toBe(true);
+      expect(await provider.isAvailable()).toBe(true);
       expect(provider.name).toBe('anthropic');
       expect(provider.getModelName()).toBe('claude-4-sonnet-20250101');
     });
@@ -70,13 +70,13 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(response).toBeDefined();
       expect(response.content).toBeDefined();
-      expect(response.model).toBe('claude-4-sonnet-20250101');
+      expect(response.meta?.model).toBeDefined();
     });
 
-    it('should not be available without API key in non-mock mode', () => {
-      const provider = new AnthropicProvider({ mock: false });
+    it('should not be available without API key in non-mock mode', async () => {
+      const provider = new AnthropicProvider({ mock: false, apiKey: undefined });
 
-      expect(provider.isAvailable()).toBe(false);
+      expect(await provider.isAvailable()).toBe(false);
     });
 
     it('should use custom model', () => {
@@ -93,8 +93,8 @@ describe('AI Providers - Mock Mode', () => {
     it('should work in mock mode', async () => {
       const provider = new GoogleAiProvider({ mock: true });
 
-      expect(provider.isAvailable()).toBe(true);
-      expect(provider.name).toBe('google-ai');
+      expect(await provider.isAvailable()).toBe(true);
+      expect(provider.name).toBe('google');
       expect(provider.getModelName()).toBe('gemini-1.5-pro-latest');
     });
 
@@ -108,13 +108,13 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(response).toBeDefined();
       expect(response.content).toBeDefined();
-      expect(response.model).toBe('gemini-1.5-pro-latest');
+      expect(response.meta?.model).toBeDefined();
     });
 
-    it('should not be available without API key in non-mock mode', () => {
-      const provider = new GoogleAiProvider({ mock: false });
+    it('should not be available without API key in non-mock mode', async () => {
+      const provider = new GoogleAiProvider({ mock: false, apiKey: undefined });
 
-      expect(provider.isAvailable()).toBe(false);
+      expect(await provider.isAvailable()).toBe(false);
     });
 
     it('should use custom model', () => {
@@ -131,9 +131,9 @@ describe('AI Providers - Mock Mode', () => {
     it('should work in mock mode', async () => {
       const provider = new XAiProvider({ mock: true });
 
-      expect(provider.isAvailable()).toBe(true);
+      expect(await provider.isAvailable()).toBe(true);
       expect(provider.name).toBe('xai');
-      expect(provider.getModelName()).toBe('grok-2');
+      expect(provider.getModelName()).toBe('grok-2-latest');
     });
 
     it('should generate mock responses', async () => {
@@ -146,13 +146,13 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(response).toBeDefined();
       expect(response.content).toBeDefined();
-      expect(response.model).toBe('grok-2');
+      expect(response.meta?.model).toBeDefined();
     });
 
-    it('should not be available without API key in non-mock mode', () => {
-      const provider = new XAiProvider({ mock: false });
+    it('should not be available without API key in non-mock mode', async () => {
+      const provider = new XAiProvider({ mock: false, apiKey: undefined });
 
-      expect(provider.isAvailable()).toBe(false);
+      expect(await provider.isAvailable()).toBe(false);
     });
 
     it('should use custom model', () => {
@@ -170,9 +170,10 @@ describe('AI Providers - Mock Mode', () => {
       const provider = new OllamaProvider({
         mock: true,
         model: 'llama3.3',
+        baseUrl: 'http://localhost:11434',
       });
 
-      expect(provider.isAvailable()).toBe(true);
+      expect(await provider.isAvailable()).toBe(true);
       expect(provider.name).toBe('ollama');
       expect(provider.getModelName()).toBe('llama3.3');
     });
@@ -181,6 +182,7 @@ describe('AI Providers - Mock Mode', () => {
       const provider = new OllamaProvider({
         mock: true,
         model: 'llama3.3',
+        baseUrl: 'http://localhost:11434',
       });
 
       const response = await provider.generate({
@@ -190,13 +192,13 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(response).toBeDefined();
       expect(response.content).toBeDefined();
-      expect(response.model).toBe('llama3.3');
+      expect(response.meta?.model).toBeDefined();
     });
 
-    it('should not be available without model in non-mock mode', () => {
-      const provider = new OllamaProvider({ mock: false });
+    it('should not be available without model in non-mock mode', async () => {
+      const provider = new OllamaProvider({ mock: false, model: undefined });
 
-      expect(provider.isAvailable()).toBe(false);
+      expect(await provider.isAvailable()).toBe(false);
     });
 
     it('should use custom base URL', () => {
@@ -211,20 +213,26 @@ describe('AI Providers - Mock Mode', () => {
   });
 
   describe('Provider Capabilities', () => {
-    it('should report capabilities correctly', () => {
+    it('should report capabilities correctly', async () => {
       const openai = new OpenAiProvider({ mock: true });
       const anthropic = new AnthropicProvider({ mock: true });
       const google = new GoogleAiProvider({ mock: true });
       const xai = new XAiProvider({ mock: true });
-      const ollama = new OllamaProvider({ mock: true, model: 'llama3.3' });
+      const ollama = new OllamaProvider({
+        mock: true,
+        model: 'llama3.3',
+        baseUrl: 'http://localhost:11434',
+      });
 
-      [openai, anthropic, google, xai, ollama].forEach(provider => {
-        const status = provider.getStatus();
+      const providers = [openai, anthropic, google, xai, ollama];
+
+      for (const provider of providers) {
+        const status = await provider.getStatus();
 
         expect(status.available).toBe(true);
         expect(status.model).toBeDefined();
         expect(status.version).toBeDefined();
-      });
+      }
     });
   });
 

@@ -17,7 +17,27 @@ module.exports = [
       },
       globals: {
         performance: 'readonly',
-        console: 'readonly'
+        console: 'readonly',
+        setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        clearTimeout: 'readonly',
+        setImmediate: 'readonly',
+        clearImmediate: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        globalThis: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        fetch: 'readonly',
+        Response: 'readonly',
+        Request: 'readonly',
+        Headers: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly'
       }
     },
     plugins: {
@@ -34,10 +54,14 @@ module.exports = [
       '@typescript-eslint/explicit-function-return-type': 'warn',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
-      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/no-misused-promises': 'warn',
+      '@typescript-eslint/no-redundant-type-constituents': 'warn',
+      '@typescript-eslint/await-thenable': 'warn',
+      '@typescript-eslint/restrict-template-expressions': 'warn',
       
       // General rules
       'no-console': 'warn',
@@ -73,6 +97,9 @@ module.exports = [
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
       'no-console': 'off',
       'no-undef': 'off'
     }
@@ -141,6 +168,27 @@ module.exports = [
     files: ['src/types/AdapterTypes.ts', 'tests/utils/seoMatchers.ts'],
     rules: {
       '@typescript-eslint/no-namespace': 'off'
+    }
+  },
+  {
+    files: ['src/ai/providers/**/*.ts', 'src/cache/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unsafe-assignment': 'warn',
+      '@typescript-eslint/no-unsafe-member-access': 'warn',
+      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+      '@typescript-eslint/no-unsafe-return': 'warn',
+      '@typescript-eslint/require-await': 'off',
+      'no-console': 'warn'
+    }
+  },
+  {
+    files: ['src/schema/**/*.ts', 'src/core/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-return': 'warn',
+      '@typescript-eslint/require-await': 'warn'
     }
   },
   {

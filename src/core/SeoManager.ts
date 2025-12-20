@@ -185,7 +185,7 @@ export class SeoManager {
 
     // Truncate if too long
     if (title.length > maxLength) {
-      title = title.substring(0, maxLength - 3) + '...';
+      title = `${title.substring(0, maxLength - 3)}...`;
     }
 
     return title;
@@ -216,7 +216,7 @@ export class SeoManager {
     }
 
     // Generate from content
-    let description = textContent.substring(0, maxLength - 3) + '...';
+    let description = `${textContent.substring(0, maxLength - 3)}...`;
 
     // Try to end at a sentence
     const lastPeriod = description.lastIndexOf('.');

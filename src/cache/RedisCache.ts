@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { CacheInterface, CacheConfig, CacheStats } from './CacheInterface';
+import type { CacheInterface, CacheConfig, CacheStats } from './CacheInterface';
 
 /**
  * Redis cache configuration
@@ -102,7 +102,7 @@ export class RedisCache implements CacheInterface {
 
     try {
       // Dynamic import for optional peer dependency
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+
       const redis = require('redis');
 
       this.client = redis.createClient({

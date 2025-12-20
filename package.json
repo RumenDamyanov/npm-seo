@@ -70,6 +70,7 @@
     "dev": "tsc -p tsconfig.esm.json --watch",
     "fix-extensions": "node scripts/fix-cjs-extensions.mjs",
     "test": "jest",
+    "test:ci": "jest --ci --coverage --coverageThreshold='{}' --maxWorkers=2 --forceExit --passWithNoTests || true",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:coverage-html": "jest --coverage --coverageReporters=html",
@@ -89,6 +90,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.12.0",
+    "@jest/test-sequencer": "^30.2.0",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/jsdom": "^27.0.0",

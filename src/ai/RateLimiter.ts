@@ -75,7 +75,7 @@ export class RateLimiter {
     timestamp: number;
   }>;
   private stats: RateLimiterStats;
-  private refillInterval: NodeJS.Timeout | null;
+  private refillInterval: ReturnType<typeof setInterval> | null;
 
   constructor(config: RateLimiterConfig) {
     this.config = {
@@ -100,7 +100,7 @@ export class RateLimiter {
     };
 
     // Start refill interval
-    this.refillInterval = setInterval(() => {
+    this.refillInterval = globalThis.setInterval(() => {
       this.refillTokens();
       this.processQueue();
     }, 1000); // Check every second
@@ -281,7 +281,7 @@ export class RateLimiter {
    */
   destroy(): void {
     if (this.refillInterval) {
-      clearInterval(this.refillInterval);
+      globalThis.clearInterval(this.refillInterval);
       this.refillInterval = null;
     }
     this.clearQueue();

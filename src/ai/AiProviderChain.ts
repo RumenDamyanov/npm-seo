@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { IAiProvider, AiGenerationResponse } from '../types/AiTypes';
+import type { IAiProvider, AiGenerationResponse } from '../types/AiTypes';
 import type { ContentAnalysis } from '../types/ContentTypes';
 
 /**
@@ -82,8 +82,8 @@ export class AiProviderChain {
       maxRetries: config.maxRetries ?? 2,
       timeout: config.timeout ?? 30000,
       tryAll: config.tryAll ?? false,
-      onProviderFailed: config.onProviderFailed ?? (() => {}),
-      onProviderSuccess: config.onProviderSuccess ?? (() => {}),
+      onProviderFailed: config.onProviderFailed ?? ((): void => {}),
+      onProviderSuccess: config.onProviderSuccess ?? ((): void => {}),
     };
 
     this.stats = {
@@ -148,7 +148,7 @@ export class AiProviderChain {
           }
 
           // Wait before retry (exponential backoff)
-          await this.sleep(Math.min(1000 * Math.pow(2, attempts - 1), 10000));
+          await this.sleep(Math.min(1000 * 2 ** (attempts - 1), 10000));
         }
       }
     }
