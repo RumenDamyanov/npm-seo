@@ -1,6 +1,6 @@
 {
   "name": "@rumenx/seo",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A comprehensive TypeScript package for AI-powered SEO optimization in Node.js applications. Framework-agnostic with built-in AI integration, Schema.org structured data, caching, batch processing, and 100% type safety.",
   "keywords": [
     "seo",
