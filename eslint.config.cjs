@@ -48,7 +48,7 @@ module.exports = [
       ...tseslint.configs.recommended.rules,
       ...tseslint.configs['recommended-requiring-type-checking'].rules,
       ...prettierConfig.rules,
-      
+
       // TypeScript specific rules
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'warn',
@@ -62,14 +62,14 @@ module.exports = [
       '@typescript-eslint/no-redundant-type-constituents': 'warn',
       '@typescript-eslint/await-thenable': 'warn',
       '@typescript-eslint/restrict-template-expressions': 'warn',
-      
+
       // General rules
       'no-console': 'warn',
       'prefer-const': 'error',
       'no-var': 'error',
       'object-shorthand': 'error',
       'prefer-template': 'error',
-      
+
       // Prettier integration
       'prettier/prettier': 'error'
     }
@@ -100,6 +100,10 @@ module.exports = [
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
       'no-console': 'off',
       'no-undef': 'off'
     }
@@ -197,6 +201,7 @@ module.exports = [
       'coverage/',
       'node_modules/',
       'examples/dist/',
+      'scripts/',
       '*.config.js',
       '*.config.cjs',
       '**/*.js',

@@ -6,16 +6,52 @@ import type {
   AnthropicConfig,
 } from '../../types/AiTypes';
 
+/**
+ * Minimal type surface for the Anthropic SDK.
+ */
+interface AnthropicMessage {
+  id: string;
+  model: string;
+  content: Array<{ text: string }>;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+  };
+}
+
+interface AnthropicMessages {
+  create(params: {
+    model: string;
+    max_tokens: number;
+    temperature?: number;
+    messages: Array<{ role: string; content: string }>;
+  }): Promise<AnthropicMessage>;
+}
+
+interface AnthropicClient {
+  messages: AnthropicMessages;
+}
+
+interface AnthropicApiError {
+  status?: number;
+  message?: string;
+}
+
+interface AnthropicConstructor {
+  new (params: { apiKey: string }): AnthropicClient;
+}
+
 // Lazy import Anthropic to avoid requiring it when not needed
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/prefer-nullish-coalescing */
-let Anthropic: any;
+let Anthropic: AnthropicConstructor | null = null;
 try {
-  Anthropic = require('@anthropic-ai/sdk').default || require('@anthropic-ai/sdk');
+  const mod = require('@anthropic-ai/sdk') as {
+    default?: AnthropicConstructor;
+  } & AnthropicConstructor;
+  Anthropic = mod.default ?? mod;
 } catch {
   // Anthropic SDK not installed, will use mock mode
   Anthropic = null;
 }
-/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/prefer-nullish-coalescing */
 
 /**
  * Anthropic AI provider implementation with real API integration
@@ -54,8 +90,7 @@ export class AnthropicProvider extends BaseAiProvider {
   };
 
   private config: AnthropicConfig;
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  private client: any | null = null;
+  private client: AnthropicClient | null = null;
   private mockMode: boolean;
 
   constructor(config: AnthropicConfig) {
@@ -63,18 +98,15 @@ export class AnthropicProvider extends BaseAiProvider {
     this.config = config;
 
     // Only enable mock mode if explicitly requested or if Anthropic SDK is not available
-    this.mockMode = (config as any).mockMode === true || !Anthropic;
+    this.mockMode = config.mockMode === true || !Anthropic;
 
     // Initialize Anthropic client if not in mock mode
     if (!this.mockMode && Anthropic && config.apiKey) {
       try {
-        /* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
         this.client = new Anthropic({
           apiKey: config.apiKey,
         });
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to initialize Anthropic client:', error);
+      } catch {
         this.client = null;
       }
     }
@@ -132,7 +164,6 @@ export class AnthropicProvider extends BaseAiProvider {
 
     try {
       // Real Anthropic API call
-      /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
       const message = await this.client.messages.create({
         model: this.getModelName(),
         max_tokens: request.maxTokens ?? 1024,
@@ -165,10 +196,8 @@ export class AnthropicProvider extends BaseAiProvider {
           requestId: message.id,
         },
       };
-      /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     } catch (error: unknown) {
-      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/prefer-nullish-coalescing */
-      const err = error as any;
+      const err = error as AnthropicApiError;
       // Handle specific Anthropic errors
       if (err.status === 401) {
         throw new Error('Anthropic API key is invalid');
@@ -178,8 +207,7 @@ export class AnthropicProvider extends BaseAiProvider {
         throw new Error('Anthropic service is temporarily unavailable');
       }
 
-      throw new Error(`Anthropic API error: ${err.message || 'Unknown error'}`);
-      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/prefer-nullish-coalescing */
+      throw new Error(`Anthropic API error: ${err.message ?? 'Unknown error'}`);
     }
   }
 

@@ -122,7 +122,7 @@ export class ProductSchema extends BaseSchema {
   setAvailability(
     availability: 'InStock' | 'OutOfStock' | 'PreOrder' | 'Discontinued' | 'LimitedAvailability'
   ): this {
-    const offer = this.getProperty<Record<string, unknown>>('offers') || { '@type': 'Offer' };
+    const offer = this.getProperty<Record<string, unknown>>('offers') ?? { '@type': 'Offer' };
     offer.availability = `https://schema.org/${availability}`;
     return this.setProperty('offers', offer);
   }
@@ -134,7 +134,7 @@ export class ProductSchema extends BaseSchema {
    * @returns This instance for chaining
    */
   setSeller(seller: string): this {
-    const offer = this.getProperty<Record<string, unknown>>('offers') || { '@type': 'Offer' };
+    const offer = this.getProperty<Record<string, unknown>>('offers') ?? { '@type': 'Offer' };
     offer.seller =
       typeof seller === 'string' && seller.startsWith('http')
         ? seller
@@ -198,7 +198,7 @@ export class ProductSchema extends BaseSchema {
           ratingValue: number;
         }
   ): this {
-    const reviews = this.getProperty<JsonLdData[]>('review') || [];
+    const reviews = this.getProperty<JsonLdData[]>('review') ?? [];
 
     if ('@type' in review) {
       reviews.push(review);

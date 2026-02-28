@@ -186,7 +186,7 @@ export class ArticleSchema extends BaseSchema {
    * @returns This instance for chaining
    */
   addComment(comment: JsonLdData): this {
-    const comments = this.getProperty<JsonLdData[]>('comment') || [];
+    const comments = this.getProperty<JsonLdData[]>('comment') ?? [];
     comments.push(comment);
     return this.setProperty('comment', comments);
   }

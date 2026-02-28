@@ -7,6 +7,29 @@ import type {
 } from '../../types/AiTypes';
 
 /**
+ * Minimal type surface for the Ollama HTTP API responses.
+ */
+interface OllamaModel {
+  name: string;
+}
+
+interface OllamaTagsResponse {
+  models?: OllamaModel[];
+}
+
+interface OllamaGenerateResponse {
+  response?: string;
+  model?: string;
+  prompt_eval_count?: number;
+  eval_count?: number;
+}
+
+interface OllamaApiError {
+  name?: string;
+  message?: string;
+}
+
+/**
  * Ollama provider implementation for local AI models
  *
  * Connects to local Ollama instance for running models like Llama, Qwen, Mistral, etc.
@@ -50,9 +73,9 @@ export class OllamaProvider extends BaseAiProvider {
     // Normalize config: use baseUrl as alias for apiUrl
     this.config = {
       ...config,
-      apiUrl: config.apiUrl || config.baseUrl || 'http://localhost:11434',
+      apiUrl: config.apiUrl ?? config.baseUrl ?? 'http://localhost:11434',
     };
-    this.mockMode = (config as any).mockMode === true;
+    this.mockMode = config.mockMode === true;
   }
 
   /**
@@ -92,10 +115,10 @@ export class OllamaProvider extends BaseAiProvider {
         return false;
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as OllamaTagsResponse;
       // Check if the specified model is available
-      const models = data.models || [];
-      return models.some((m: any) => m.name.includes(this.config.model));
+      const models = data.models ?? [];
+      return models.some((m: OllamaModel) => m.name.includes(this.config.model));
     } catch {
       return false;
     }
@@ -141,9 +164,9 @@ export class OllamaProvider extends BaseAiProvider {
         throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as OllamaGenerateResponse;
       const processingTime = Date.now() - startTime;
-      const content = data.response || '';
+      const content = data.response ?? '';
       const alternatives = this.extractAlternatives(content);
 
       return {
@@ -155,29 +178,30 @@ export class OllamaProvider extends BaseAiProvider {
           totalTokens: (data.prompt_eval_count ?? 0) + (data.eval_count ?? 0),
         },
         meta: {
-          model: data.model || this.config.model,
+          model: data.model ?? this.config.model,
           provider: this.name,
           generatedAt: new Date(),
           processingTime,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as OllamaApiError;
       // Handle Ollama-specific errors
-      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+      if (err.name === 'AbortError' || err.name === 'TimeoutError') {
         throw new Error(
           'Ollama request timed out. The model may be loading or the request is too complex.'
         );
-      } else if (error.message?.includes('ECONNREFUSED')) {
+      } else if (err.message?.includes('ECONNREFUSED')) {
         throw new Error(
           `Could not connect to Ollama. Make sure Ollama is running at ${this.config.apiUrl}`
         );
-      } else if (error.message?.includes('model not found')) {
+      } else if (err.message?.includes('model not found')) {
         throw new Error(
           `Model "${this.config.model}" not found. Pull it with: ollama pull ${this.config.model}`
         );
       }
 
-      throw new Error(`Ollama error: ${error.message || 'Unknown error'}`);
+      throw new Error(`Ollama error: ${err.message ?? 'Unknown error'}`);
     }
   }
 

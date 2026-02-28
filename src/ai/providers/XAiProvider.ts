@@ -6,11 +6,53 @@ import type {
   XAiConfig,
 } from '../../types/AiTypes';
 
+/**
+ * Minimal type surface for the OpenAI-compatible SDK used by xAI.
+ */
+interface XAiChatCompletion {
+  model: string;
+  choices: Array<{ message?: { content?: string } }>;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}
+
+interface XAiChatCompletions {
+  create(params: {
+    model: string;
+    messages: Array<{ role: string; content: string }>;
+    max_tokens?: number;
+    temperature?: number;
+    n?: number;
+  }): Promise<XAiChatCompletion>;
+}
+
+interface XAiModels {
+  list(): Promise<unknown>;
+}
+
+interface XAiClient {
+  chat: { completions: XAiChatCompletions };
+  models: XAiModels;
+}
+
+interface XAiApiError {
+  status?: number;
+  message?: string;
+}
+
+interface XAiConstructor {
+  new (params: { apiKey: string; baseURL?: string }): XAiClient;
+}
+
 // Lazy import for xAI SDK (when available)
 // Currently xAI uses OpenAI-compatible API
-let OpenAI: any;
+let OpenAI: XAiConstructor | null = null;
 try {
-  OpenAI = require('openai').default || require('openai');
+  const mod = require('openai') as { default?: XAiConstructor } & XAiConstructor;
+  OpenAI = mod.default ?? mod;
 } catch {
   // OpenAI SDK not installed, will use mock mode
   OpenAI = null;
@@ -54,24 +96,23 @@ export class XAiProvider extends BaseAiProvider {
   };
 
   private config: XAiConfig;
-  private client: any | null = null;
+  private client: XAiClient | null = null;
   private mockMode: boolean;
 
   constructor(config: XAiConfig) {
     super();
     this.config = config;
     // Only enable mock mode if explicitly requested or if OpenAI SDK is not available
-    this.mockMode = (config as any).mockMode === true || !OpenAI;
+    this.mockMode = config.mockMode === true || !OpenAI;
 
     // Initialize xAI client (using OpenAI SDK with custom base URL)
     if (!this.mockMode && OpenAI && config.apiKey) {
       try {
         this.client = new OpenAI({
           apiKey: config.apiKey,
-          baseURL: config.baseUrl || 'https://api.x.ai/v1',
+          baseURL: config.baseUrl ?? 'https://api.x.ai/v1',
         });
-      } catch (error) {
-        console.warn('Failed to initialize xAI client:', error);
+      } catch {
         this.client = null;
       }
     }
@@ -171,17 +212,18 @@ export class XAiProvider extends BaseAiProvider {
           processingTime,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as XAiApiError;
       // Handle specific xAI errors
-      if (error.status === 401) {
+      if (err.status === 401) {
         throw new Error('xAI API key is invalid');
-      } else if (error.status === 429) {
+      } else if (err.status === 429) {
         throw new Error('xAI rate limit exceeded. Please try again later.');
-      } else if (error.status === 500 || error.status === 503) {
+      } else if (err.status === 500 || err.status === 503) {
         throw new Error('xAI service is temporarily unavailable');
       }
 
-      throw new Error(`xAI API error: ${error.message || 'Unknown error'}`);
+      throw new Error(`xAI API error: ${err.message ?? 'Unknown error'}`);
     }
   }
 

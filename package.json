@@ -90,8 +90,7 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"*.{js,json,md}\"",
     "typecheck": "tsc --noEmit",
     "quality": "npm run lint && npm run format:check && npm run typecheck",
-    "prepublishOnly": "npm run quality && npm run test:ci && npm run build",
-    "semantic-release": "semantic-release"
+    "prepublishOnly": "npm run quality && npm run test:ci && npm run build"
   },
   "dependencies": {
     "jsdom": "^28.0.0",
@@ -116,7 +115,6 @@
     "next": "^16.0.0",
     "prettier": "^3.2.5",
     "rimraf": "^6.0.1",
-    "semantic-release": "^25.0.2",
     "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"
   },

@@ -185,10 +185,8 @@ export abstract class BaseSchema {
    * @returns New schema instance with same data
    */
   clone(): this {
-    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
-    const cloned = Object.create(Object.getPrototypeOf(this));
+    const cloned = Object.create(Object.getPrototypeOf(this) as object) as this;
     cloned.data = { ...this.data };
-    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
     return cloned;
   }
 }

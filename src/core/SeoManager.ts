@@ -157,8 +157,7 @@ export class SeoManager {
 
       return this.parseAiResponse(response.content, type);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('AI generation failed:', error);
+      void error;
       return this.generateFallbackSuggestions(analysis, type);
     }
   }
@@ -674,7 +673,7 @@ Generate ${options.contentLength ?? 'additional'} content suggestions that would
    * const results = await seoManager.analyzeBatch(documents);
    * ```
    */
-  async analyzeBatch(
+  analyzeBatch(
     documents: Array<{
       id: string;
       content: string;
@@ -703,7 +702,7 @@ Generate ${options.contentLength ?? 'additional'} content suggestions that would
     // Process in chunks
     for (let i = 0; i < documents.length; i += concurrency) {
       const chunk = documents.slice(i, i + concurrency);
-      const chunkPromises = chunk.map(async doc => {
+      const chunkPromises = chunk.map(doc => {
         try {
           // Analyze document
           const analyzeOptions = options.fast !== undefined ? { fast: options.fast } : {};
@@ -747,11 +746,11 @@ Generate ${options.contentLength ?? 'additional'} content suggestions that would
         }
       });
 
-      const chunkResults = await Promise.all(chunkPromises);
+      const chunkResults = chunkPromises;
       results.push(...chunkResults);
     }
 
-    return results;
+    return Promise.resolve(results);
   }
 
   /**

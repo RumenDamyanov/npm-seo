@@ -264,7 +264,7 @@ export class RateLimiter {
    * Clear queue and reject all pending requests
    */
   clearQueue(error?: Error): void {
-    const defaultError = error || new Error('Rate limiter queue cleared');
+    const defaultError = error ?? new Error('Rate limiter queue cleared');
 
     while (this.queue.length > 0) {
       const item = this.queue.shift();

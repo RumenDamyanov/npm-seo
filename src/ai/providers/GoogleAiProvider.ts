@@ -6,11 +6,38 @@ import type {
   GoogleAiConfig,
 } from '../../types/AiTypes';
 
+/**
+ * Minimal type surface for the Google Generative AI SDK.
+ */
+interface GenerateContentResponse {
+  text(): string;
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    totalTokenCount?: number;
+  };
+}
+
+interface GenerativeModel {
+  generateContent(request: {
+    contents: Array<{ role: string; parts: Array<{ text: string }> }>;
+    generationConfig?: { maxOutputTokens?: number; temperature?: number };
+  }): Promise<{ response: GenerateContentResponse }>;
+}
+
+interface GoogleAiClient {
+  getGenerativeModel(params: { model: string }): GenerativeModel;
+}
+
+interface GoogleAiConstructor {
+  new (apiKey: string): GoogleAiClient;
+}
+
 // Lazy import Google Generative AI to avoid requiring it when not needed
-let GoogleGenerativeAI: any;
+let GoogleGenerativeAI: GoogleAiConstructor | null = null;
 try {
-  const module = require('@google/generative-ai');
-  GoogleGenerativeAI = module.GoogleGenerativeAI;
+  const mod = require('@google/generative-ai') as { GoogleGenerativeAI: GoogleAiConstructor };
+  GoogleGenerativeAI = mod.GoogleGenerativeAI;
 } catch {
   // Google AI SDK not installed, will use mock mode
   GoogleGenerativeAI = null;
@@ -53,21 +80,20 @@ export class GoogleAiProvider extends BaseAiProvider {
   };
 
   private config: GoogleAiConfig;
-  private client: any | null = null;
+  private client: GoogleAiClient | null = null;
   private mockMode: boolean;
 
   constructor(config: GoogleAiConfig) {
     super();
     this.config = config;
     // Only enable mock mode if explicitly requested or if Google AI SDK is not available
-    this.mockMode = (config as any).mockMode === true || !GoogleGenerativeAI;
+    this.mockMode = config.mockMode === true || !GoogleGenerativeAI;
 
     // Initialize Google AI client if not in mock mode
     if (!this.mockMode && GoogleGenerativeAI && config.apiKey) {
       try {
         this.client = new GoogleGenerativeAI(config.apiKey);
-      } catch (error) {
-        console.warn('Failed to initialize Google AI client:', error);
+      } catch {
         this.client = null;
       }
     }
@@ -136,13 +162,13 @@ export class GoogleAiProvider extends BaseAiProvider {
         },
       });
 
-      const response = await result.response;
+      const response = result.response;
       const processingTime = Date.now() - startTime;
       const content = response.text();
       const alternatives = this.extractAlternatives(content);
 
       // Extract token usage if available
-      const usageMetadata = response.usageMetadata || {};
+      const usageMetadata = response.usageMetadata ?? {};
 
       return {
         content,
@@ -159,17 +185,18 @@ export class GoogleAiProvider extends BaseAiProvider {
           processingTime,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       // Handle specific Google AI errors
-      if (error.message?.includes('API_KEY_INVALID')) {
+      if (message.includes('API_KEY_INVALID')) {
         throw new Error('Google AI API key is invalid');
-      } else if (error.message?.includes('RATE_LIMIT_EXCEEDED')) {
+      } else if (message.includes('RATE_LIMIT_EXCEEDED')) {
         throw new Error('Google AI rate limit exceeded. Please try again later.');
-      } else if (error.message?.includes('SERVICE_UNAVAILABLE')) {
+      } else if (message.includes('SERVICE_UNAVAILABLE')) {
         throw new Error('Google AI service is temporarily unavailable');
       }
 
-      throw new Error(`Google AI API error: ${error.message || 'Unknown error'}`);
+      throw new Error(`Google AI API error: ${message}`);
     }
   }
 

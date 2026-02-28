@@ -292,8 +292,11 @@ export class AiProviderChain {
   /**
    * Get list of available providers
    */
-  getAvailableProviders(): string[] {
-    return this.config.providers.filter(p => p.isAvailable()).map(p => p.name);
+  async getAvailableProviders(): Promise<string[]> {
+    const results = await Promise.all(
+      this.config.providers.map(async p => ({ name: p.name, available: await p.isAvailable() }))
+    );
+    return results.filter(r => r.available).map(r => r.name);
   }
 
   /**

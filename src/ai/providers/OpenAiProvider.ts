@@ -6,10 +6,52 @@ import type {
   OpenAiConfig,
 } from '../../types/AiTypes';
 
+/**
+ * Minimal type surface for the OpenAI SDK.
+ */
+interface ChatCompletion {
+  model: string;
+  choices: Array<{ message?: { content?: string } }>;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}
+
+interface ChatCompletions {
+  create(params: {
+    model: string;
+    messages: Array<{ role: string; content: string }>;
+    max_tokens?: number;
+    temperature?: number;
+    n?: number;
+  }): Promise<ChatCompletion>;
+}
+
+interface OpenAiModels {
+  list(): Promise<unknown>;
+}
+
+interface OpenAiClient {
+  chat: { completions: ChatCompletions };
+  models: OpenAiModels;
+}
+
+interface OpenAiApiError {
+  status?: number;
+  message?: string;
+}
+
+interface OpenAiConstructor {
+  new (params: { apiKey: string; organization?: string; baseURL?: string }): OpenAiClient;
+}
+
 // Lazy import OpenAI to avoid requiring it when not needed
-let OpenAI: any;
+let OpenAI: OpenAiConstructor | null = null;
 try {
-  OpenAI = require('openai').default || require('openai');
+  const mod = require('openai') as { default?: OpenAiConstructor } & OpenAiConstructor;
+  OpenAI = mod.default ?? mod;
 } catch {
   // OpenAI not installed, will use mock mode
   OpenAI = null;
@@ -52,14 +94,14 @@ export class OpenAiProvider extends BaseAiProvider {
   };
 
   private config: OpenAiConfig;
-  private client: any | null = null;
+  private client: OpenAiClient | null = null;
   private mockMode: boolean;
 
   constructor(config: OpenAiConfig) {
     super();
     this.config = config;
     // Only enable mock mode if explicitly requested or if OpenAI SDK is not available
-    this.mockMode = (config as any).mockMode === true || !OpenAI;
+    this.mockMode = config.mockMode === true || !OpenAI;
 
     // Initialize OpenAI client if not in mock mode
     if (!this.mockMode && OpenAI && config.apiKey) {
@@ -68,8 +110,7 @@ export class OpenAiProvider extends BaseAiProvider {
           apiKey: config.apiKey,
           ...(config.organization && { organization: config.organization }),
         });
-      } catch (error) {
-        console.warn('Failed to initialize OpenAI client:', error);
+      } catch {
         this.client = null;
       }
     }
@@ -161,17 +202,18 @@ export class OpenAiProvider extends BaseAiProvider {
           processingTime,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as OpenAiApiError;
       // Handle specific OpenAI errors
-      if (error.status === 401) {
+      if (err.status === 401) {
         throw new Error('OpenAI API key is invalid');
-      } else if (error.status === 429) {
+      } else if (err.status === 429) {
         throw new Error('OpenAI rate limit exceeded. Please try again later.');
-      } else if (error.status === 500 || error.status === 503) {
+      } else if (err.status === 500 || err.status === 503) {
         throw new Error('OpenAI service is temporarily unavailable');
       }
 
-      throw new Error(`OpenAI API error: ${error.message || 'Unknown error'}`);
+      throw new Error(`OpenAI API error: ${err.message ?? 'Unknown error'}`);
     }
   }
 

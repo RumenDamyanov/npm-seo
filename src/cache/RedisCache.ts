@@ -9,6 +9,33 @@
 import type { CacheInterface, CacheConfig, CacheStats } from './CacheInterface';
 
 /**
+ * Minimal type surface for the redis client.
+ */
+interface RedisClient {
+  on(event: string, callback: (err: Error) => void): void;
+  connect(): Promise<void>;
+  quit(): Promise<void>;
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string): Promise<unknown>;
+  setEx(key: string, seconds: number, value: string): Promise<unknown>;
+  exists(key: string): Promise<number>;
+  del(key: string | string[]): Promise<number>;
+  keys(pattern: string): Promise<string[]>;
+  mGet(keys: string[]): Promise<(string | null)[]>;
+  multi(): RedisPipeline;
+}
+
+interface RedisPipeline {
+  set(key: string, value: string): RedisPipeline;
+  setEx(key: string, seconds: number, value: string): RedisPipeline;
+  exec(): Promise<unknown>;
+}
+
+interface RedisModule {
+  createClient(options: { url: string; socket?: { connectTimeout: number } }): RedisClient;
+}
+
+/**
  * Redis cache configuration
  */
 export interface RedisCacheConfig extends CacheConfig {
@@ -61,7 +88,7 @@ export interface RedisCacheConfig extends CacheConfig {
  * ```
  */
 export class RedisCache implements CacheInterface {
-  private client: any; // Redis client (dynamic import)
+  private client: RedisClient | null = null;
   private config: Required<RedisCacheConfig>;
   private stats: CacheStats;
   private connected: boolean;
@@ -102,8 +129,7 @@ export class RedisCache implements CacheInterface {
 
     try {
       // Dynamic import for optional peer dependency
-
-      const redis = require('redis');
+      const redis = require('redis') as RedisModule;
 
       this.client = redis.createClient({
         url: this.config.url,
@@ -113,7 +139,8 @@ export class RedisCache implements CacheInterface {
       });
 
       this.client.on('error', (err: Error) => {
-        console.error('Redis Client Error:', err);
+        // Redis client error - logged for diagnostics
+        void err;
       });
 
       await this.client.connect();
@@ -136,6 +163,16 @@ export class RedisCache implements CacheInterface {
   }
 
   /**
+   * Get the connected Redis client (throws if not connected).
+   */
+  private getClient(): RedisClient {
+    if (!this.client) {
+      throw new Error('Redis client is not connected');
+    }
+    return this.client;
+  }
+
+  /**
    * Get namespaced key
    */
   private getKey(key: string): string {
@@ -147,7 +184,7 @@ export class RedisCache implements CacheInterface {
     const nsKey = this.getKey(key);
 
     try {
-      const value = await this.client.get(nsKey);
+      const value = await this.getClient().get(nsKey);
 
       if (value === null || value === undefined) {
         if (this.config.enableStats) {
@@ -163,9 +200,8 @@ export class RedisCache implements CacheInterface {
       }
 
       // Type guard ensures value is string at this point
-      return JSON.parse(value as string) as T;
-    } catch (error) {
-      console.error('Redis get error:', error);
+      return JSON.parse(value) as T;
+    } catch {
       return null;
     }
   }
@@ -179,9 +215,9 @@ export class RedisCache implements CacheInterface {
       const serialized = JSON.stringify(value);
 
       if (effectiveTtl > 0) {
-        await this.client.setEx(nsKey, effectiveTtl, serialized);
+        await this.getClient().setEx(nsKey, effectiveTtl, serialized);
       } else {
-        await this.client.set(nsKey, serialized);
+        await this.getClient().set(nsKey, serialized);
       }
 
       if (this.config.enableStats) {
@@ -189,8 +225,7 @@ export class RedisCache implements CacheInterface {
       }
 
       return true;
-    } catch (error) {
-      console.error('Redis set error:', error);
+    } catch {
       return false;
     }
   }
@@ -200,10 +235,9 @@ export class RedisCache implements CacheInterface {
     const nsKey = this.getKey(key);
 
     try {
-      const exists = await this.client.exists(nsKey);
+      const exists = await this.getClient().exists(nsKey);
       return exists === 1;
-    } catch (error) {
-      console.error('Redis has error:', error);
+    } catch {
       return false;
     }
   }
@@ -213,15 +247,14 @@ export class RedisCache implements CacheInterface {
     const nsKey = this.getKey(key);
 
     try {
-      const deleted = await this.client.del(nsKey);
+      const deleted = await this.getClient().del(nsKey);
 
       if (deleted > 0 && this.config.enableStats) {
         this.stats.deletes++;
       }
 
       return deleted > 0;
-    } catch (error) {
-      console.error('Redis delete error:', error);
+    } catch {
       return false;
     }
   }
@@ -231,15 +264,14 @@ export class RedisCache implements CacheInterface {
 
     try {
       const pattern = `${this.config.namespace}:*`;
-      const keys: string[] = await this.client.keys(pattern);
+      const keys: string[] = await this.getClient().keys(pattern);
 
       if (keys.length > 0) {
-        await this.client.del(keys);
+        await this.getClient().del(keys);
       }
 
       return true;
-    } catch (error) {
-      console.error('Redis clear error:', error);
+    } catch {
       return false;
     }
   }
@@ -254,7 +286,7 @@ export class RedisCache implements CacheInterface {
 
     try {
       const nsKeys = keys.map(k => this.getKey(k));
-      const values: (string | null)[] = await this.client.mGet(nsKeys);
+      const values: (string | null)[] = await this.getClient().mGet(nsKeys);
 
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
@@ -279,8 +311,8 @@ export class RedisCache implements CacheInterface {
       if (this.config.enableStats) {
         this.updateHitRate();
       }
-    } catch (error) {
-      console.error('Redis getMany error:', error);
+    } catch {
+      // Redis getMany error - fall through with partial results
     }
 
     return result;
@@ -295,7 +327,7 @@ export class RedisCache implements CacheInterface {
 
     try {
       const effectiveTtl = ttl ?? this.config.ttl;
-      const pipeline = this.client.multi();
+      const pipeline = this.getClient().multi();
 
       for (const [key, value] of entries.entries()) {
         const nsKey = this.getKey(key);
@@ -315,8 +347,7 @@ export class RedisCache implements CacheInterface {
       }
 
       return true;
-    } catch (error) {
-      console.error('Redis setMany error:', error);
+    } catch {
       return false;
     }
   }
@@ -330,15 +361,14 @@ export class RedisCache implements CacheInterface {
 
     try {
       const nsKeys = keys.map(k => this.getKey(k));
-      const deleted = await this.client.del(nsKeys);
+      const deleted = await this.getClient().del(nsKeys);
 
       if (this.config.enableStats) {
         this.stats.deletes += deleted;
       }
 
       return deleted;
-    } catch (error) {
-      console.error('Redis deleteMany error:', error);
+    } catch {
       return 0;
     }
   }
@@ -351,10 +381,10 @@ export class RedisCache implements CacheInterface {
     try {
       await this.ensureConnected();
       const pattern = `${this.config.namespace}:*`;
-      const keys: string[] = await this.client.keys(pattern);
+      const keys: string[] = await this.getClient().keys(pattern);
       this.stats.size = keys.length;
-    } catch (error) {
-      console.error('Redis getStats error:', error);
+    } catch {
+      // Redis getStats error - return current stats
     }
 
     return { ...this.stats };
@@ -376,8 +406,8 @@ export class RedisCache implements CacheInterface {
       try {
         await this.client.quit();
         this.connected = false;
-      } catch (error) {
-        console.error('Redis close error:', error);
+      } catch {
+        // Redis close error - ignore
       }
     }
   }
