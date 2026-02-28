@@ -98,7 +98,10 @@ export class AnthropicProvider extends BaseAiProvider {
     this.config = config;
 
     // Only enable mock mode if explicitly requested or if Anthropic SDK is not available
-    this.mockMode = config.mockMode === true || config.mock === true || (config.mockMode !== false && config.mock !== false && !Anthropic);
+    this.mockMode =
+      config.mockMode === true ||
+      config.mock === true ||
+      (config.mockMode !== false && config.mock !== false && !Anthropic);
 
     // Initialize Anthropic client if not in mock mode
     if (!this.mockMode && Anthropic && config.apiKey) {

@@ -87,7 +87,10 @@ export class GoogleAiProvider extends BaseAiProvider {
     super();
     this.config = config;
     // Only enable mock mode if explicitly requested or if Google AI SDK is not available
-    this.mockMode = config.mockMode === true || config.mock === true || (config.mockMode !== false && config.mock !== false && !GoogleGenerativeAI);
+    this.mockMode =
+      config.mockMode === true ||
+      config.mock === true ||
+      (config.mockMode !== false && config.mock !== false && !GoogleGenerativeAI);
 
     // Initialize Google AI client if not in mock mode
     if (!this.mockMode && GoogleGenerativeAI && config.apiKey) {

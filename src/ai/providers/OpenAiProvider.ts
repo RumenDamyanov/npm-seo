@@ -101,7 +101,10 @@ export class OpenAiProvider extends BaseAiProvider {
     super();
     this.config = config;
     // Only enable mock mode if explicitly requested or if OpenAI SDK is not available (and mock not explicitly disabled)
-    this.mockMode = config.mockMode === true || config.mock === true || (config.mockMode !== false && config.mock !== false && !OpenAI);
+    this.mockMode =
+      config.mockMode === true ||
+      config.mock === true ||
+      (config.mockMode !== false && config.mock !== false && !OpenAI);
 
     // Initialize OpenAI client if not in mock mode
     if (!this.mockMode && OpenAI && config.apiKey) {

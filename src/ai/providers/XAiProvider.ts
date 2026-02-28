@@ -103,7 +103,10 @@ export class XAiProvider extends BaseAiProvider {
     super();
     this.config = config;
     // Only enable mock mode if explicitly requested or if OpenAI SDK is not available
-    this.mockMode = config.mockMode === true || config.mock === true || (config.mockMode !== false && config.mock !== false && !OpenAI);
+    this.mockMode =
+      config.mockMode === true ||
+      config.mock === true ||
+      (config.mockMode !== false && config.mock !== false && !OpenAI);
 
     // Initialize xAI client (using OpenAI SDK with custom base URL)
     if (!this.mockMode && OpenAI && config.apiKey) {

@@ -36,9 +36,7 @@ describe('ArticleSchema', () => {
   });
 
   it('should set author', () => {
-    const article = new ArticleSchema()
-      .setHeadline('Test Article')
-      .setAuthor({
+    const article = new ArticleSchema().setHeadline('Test Article').setAuthor({
       '@type': 'Person',
       name: 'John Doe',
       url: 'https://example.com/john',
@@ -54,9 +52,7 @@ describe('ArticleSchema', () => {
   });
 
   it('should set publisher', () => {
-    const article = new ArticleSchema()
-      .setHeadline('Test Article')
-      .setPublisher({
+    const article = new ArticleSchema().setHeadline('Test Article').setPublisher({
       '@type': 'Organization',
       name: 'Example Inc',
       logo: {
@@ -91,8 +87,7 @@ describe('ArticleSchema', () => {
 
 describe('BreadcrumbListSchema', () => {
   it('should create empty breadcrumb list', () => {
-    const breadcrumbs = new BreadcrumbListSchema()
-      .addItem('Home', 'https://example.com', 1);
+    const breadcrumbs = new BreadcrumbListSchema().addItem('Home', 'https://example.com', 1);
 
     const json = breadcrumbs.toJson();
 
@@ -131,8 +126,7 @@ describe('BreadcrumbListSchema', () => {
   });
 
   it('should handle empty items', () => {
-    const breadcrumbs = new BreadcrumbListSchema()
-      .addItem('Home', 'https://example.com', 1);
+    const breadcrumbs = new BreadcrumbListSchema().addItem('Home', 'https://example.com', 1);
 
     const jsonString = breadcrumbs.toString();
 
@@ -167,9 +161,7 @@ describe('ProductSchema', () => {
   });
 
   it('should set brand', () => {
-    const product = new ProductSchema()
-      .setName('Test Product')
-      .setBrand({
+    const product = new ProductSchema().setName('Test Product').setBrand({
       '@type': 'Brand',
       name: 'Example Brand',
     });
@@ -183,9 +175,7 @@ describe('ProductSchema', () => {
   });
 
   it('should set offers', () => {
-    const product = new ProductSchema()
-      .setName('Test Product')
-      .setOffers({
+    const product = new ProductSchema().setName('Test Product').setOffers({
       '@type': 'Offer',
       price: '99.99',
       priceCurrency: 'USD',
@@ -205,9 +195,7 @@ describe('ProductSchema', () => {
   });
 
   it('should set aggregate rating', () => {
-    const product = new ProductSchema()
-      .setName('Test Product')
-      .setAggregateRating({
+    const product = new ProductSchema().setName('Test Product').setAggregateRating({
       '@type': 'AggregateRating',
       ratingValue: 4.5,
       reviewCount: 100,
@@ -223,9 +211,7 @@ describe('ProductSchema', () => {
   });
 
   it('should add reviews', () => {
-    const product = new ProductSchema()
-      .setName('Test Product')
-      .addReview({
+    const product = new ProductSchema().setName('Test Product').addReview({
       '@type': 'Review',
       author: {
         '@type': 'Person',
@@ -320,9 +306,7 @@ describe('BaseSchema', () => {
   });
 
   it('should set name', () => {
-    const article = new ArticleSchema()
-      .setHeadline('Test Article')
-      .setName('Article Name');
+    const article = new ArticleSchema().setHeadline('Test Article').setName('Article Name');
 
     const json = article.toJson();
 
