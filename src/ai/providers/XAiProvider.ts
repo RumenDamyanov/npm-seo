@@ -103,7 +103,7 @@ export class XAiProvider extends BaseAiProvider {
     super();
     this.config = config;
     // Only enable mock mode if explicitly requested or if OpenAI SDK is not available
-    this.mockMode = config.mockMode === true || !OpenAI;
+    this.mockMode = config.mockMode === true || config.mock === true || (config.mockMode !== false && config.mock !== false && !OpenAI);
 
     // Initialize xAI client (using OpenAI SDK with custom base URL)
     if (!this.mockMode && OpenAI && config.apiKey) {
@@ -123,7 +123,7 @@ export class XAiProvider extends BaseAiProvider {
    * Default to Grok-2 (latest stable model)
    * Alternatives: grok-2-mini (faster, cheaper)
    */
-  protected getModelName(): string {
+  public getModelName(): string {
     return this.config.model ?? 'grok-2-latest';
   }
 

@@ -107,7 +107,7 @@ export abstract class BaseAiProvider implements IAiProvider {
   /**
    * Get the current model name
    */
-  protected abstract getModelName(): string;
+  abstract getModelName(): string;
 
   /**
    * Get the provider version

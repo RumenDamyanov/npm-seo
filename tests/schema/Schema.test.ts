@@ -36,7 +36,9 @@ describe('ArticleSchema', () => {
   });
 
   it('should set author', () => {
-    const article = new ArticleSchema().setAuthor({
+    const article = new ArticleSchema()
+      .setHeadline('Test Article')
+      .setAuthor({
       '@type': 'Person',
       name: 'John Doe',
       url: 'https://example.com/john',
@@ -52,7 +54,9 @@ describe('ArticleSchema', () => {
   });
 
   it('should set publisher', () => {
-    const article = new ArticleSchema().setPublisher({
+    const article = new ArticleSchema()
+      .setHeadline('Test Article')
+      .setPublisher({
       '@type': 'Organization',
       name: 'Example Inc',
       logo: {
@@ -76,7 +80,7 @@ describe('ArticleSchema', () => {
   it('should convert to JSON-LD string', () => {
     const article = new ArticleSchema().setHeadline('Test');
 
-    const jsonString = article.toJsonLd();
+    const jsonString = article.toString();
 
     expect(jsonString).toContain('"@context"');
     expect(jsonString).toContain('"@type"');
@@ -87,13 +91,14 @@ describe('ArticleSchema', () => {
 
 describe('BreadcrumbListSchema', () => {
   it('should create empty breadcrumb list', () => {
-    const breadcrumbs = new BreadcrumbListSchema();
+    const breadcrumbs = new BreadcrumbListSchema()
+      .addItem('Home', 'https://example.com', 1);
 
     const json = breadcrumbs.toJson();
 
     expect(json['@context']).toBe('https://schema.org');
     expect(json['@type']).toBe('BreadcrumbList');
-    expect(json.itemListElement).toEqual([]);
+    expect(json.itemListElement).toHaveLength(1);
   });
 
   it('should add breadcrumb items', () => {
@@ -126,9 +131,10 @@ describe('BreadcrumbListSchema', () => {
   });
 
   it('should handle empty items', () => {
-    const breadcrumbs = new BreadcrumbListSchema();
+    const breadcrumbs = new BreadcrumbListSchema()
+      .addItem('Home', 'https://example.com', 1);
 
-    const jsonString = breadcrumbs.toJsonLd();
+    const jsonString = breadcrumbs.toString();
 
     expect(() => JSON.parse(jsonString)).not.toThrow();
   });
@@ -151,7 +157,9 @@ describe('ProductSchema', () => {
   });
 
   it('should set product image', () => {
-    const product = new ProductSchema().setImage('https://example.com/product.jpg');
+    const product = new ProductSchema()
+      .setName('Test Product')
+      .setImage('https://example.com/product.jpg');
 
     const json = product.toJson();
 
@@ -159,7 +167,9 @@ describe('ProductSchema', () => {
   });
 
   it('should set brand', () => {
-    const product = new ProductSchema().setBrand({
+    const product = new ProductSchema()
+      .setName('Test Product')
+      .setBrand({
       '@type': 'Brand',
       name: 'Example Brand',
     });
@@ -173,7 +183,9 @@ describe('ProductSchema', () => {
   });
 
   it('should set offers', () => {
-    const product = new ProductSchema().setOffers({
+    const product = new ProductSchema()
+      .setName('Test Product')
+      .setOffers({
       '@type': 'Offer',
       price: '99.99',
       priceCurrency: 'USD',
@@ -193,7 +205,9 @@ describe('ProductSchema', () => {
   });
 
   it('should set aggregate rating', () => {
-    const product = new ProductSchema().setAggregateRating({
+    const product = new ProductSchema()
+      .setName('Test Product')
+      .setAggregateRating({
       '@type': 'AggregateRating',
       ratingValue: 4.5,
       reviewCount: 100,
@@ -209,7 +223,9 @@ describe('ProductSchema', () => {
   });
 
   it('should add reviews', () => {
-    const product = new ProductSchema().addReview({
+    const product = new ProductSchema()
+      .setName('Test Product')
+      .addReview({
       '@type': 'Review',
       author: {
         '@type': 'Person',
@@ -230,6 +246,7 @@ describe('ProductSchema', () => {
 
   it('should add multiple reviews', () => {
     const product = new ProductSchema()
+      .setName('Test Product')
       .addReview({
         '@type': 'Review',
         author: { '@type': 'Person', name: 'User 1' },
@@ -284,7 +301,7 @@ describe('ProductSchema', () => {
   it('should convert to JSON-LD string', () => {
     const product = new ProductSchema().setName('Test Product').setSKU('TEST-001');
 
-    const jsonString = product.toJsonLd();
+    const jsonString = product.toString(false);
 
     expect(jsonString).toContain('"@type":"Product"');
     expect(() => JSON.parse(jsonString)).not.toThrow();
@@ -293,7 +310,9 @@ describe('ProductSchema', () => {
 
 describe('BaseSchema', () => {
   it('should set ID', () => {
-    const article = new ArticleSchema().setId('https://example.com/article#main');
+    const article = new ArticleSchema()
+      .setHeadline('Test Article')
+      .setId('https://example.com/article#main');
 
     const json = article.toJson();
 
@@ -301,7 +320,9 @@ describe('BaseSchema', () => {
   });
 
   it('should set name', () => {
-    const article = new ArticleSchema().setName('Article Name');
+    const article = new ArticleSchema()
+      .setHeadline('Test Article')
+      .setName('Article Name');
 
     const json = article.toJson();
 

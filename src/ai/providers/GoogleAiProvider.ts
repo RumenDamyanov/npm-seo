@@ -87,7 +87,7 @@ export class GoogleAiProvider extends BaseAiProvider {
     super();
     this.config = config;
     // Only enable mock mode if explicitly requested or if Google AI SDK is not available
-    this.mockMode = config.mockMode === true || !GoogleGenerativeAI;
+    this.mockMode = config.mockMode === true || config.mock === true || (config.mockMode !== false && config.mock !== false && !GoogleGenerativeAI);
 
     // Initialize Google AI client if not in mock mode
     if (!this.mockMode && GoogleGenerativeAI && config.apiKey) {
@@ -104,7 +104,7 @@ export class GoogleAiProvider extends BaseAiProvider {
    * Updated to Gemini 1.5 Pro (latest stable) - massive context window
    * Alternatives: gemini-1.5-flash (faster), gemini-2.0-flash-exp (experimental)
    */
-  protected getModelName(): string {
+  public getModelName(): string {
     return this.config.model ?? 'gemini-1.5-pro-latest';
   }
 

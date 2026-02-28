@@ -100,8 +100,8 @@ export class OpenAiProvider extends BaseAiProvider {
   constructor(config: OpenAiConfig) {
     super();
     this.config = config;
-    // Only enable mock mode if explicitly requested or if OpenAI SDK is not available
-    this.mockMode = config.mockMode === true || !OpenAI;
+    // Only enable mock mode if explicitly requested or if OpenAI SDK is not available (and mock not explicitly disabled)
+    this.mockMode = config.mockMode === true || config.mock === true || (config.mockMode !== false && config.mock !== false && !OpenAI);
 
     // Initialize OpenAI client if not in mock mode
     if (!this.mockMode && OpenAI && config.apiKey) {
@@ -121,7 +121,7 @@ export class OpenAiProvider extends BaseAiProvider {
    * Updated to GPT-4.1 Turbo (2025) - best balance of performance and cost
    * Alternatives: gpt-4.1 (standard), gpt-4o-mini (cost-effective)
    */
-  protected getModelName(): string {
+  public getModelName(): string {
     return this.config.model ?? 'gpt-4.1-turbo';
   }
 

@@ -161,21 +161,24 @@ export class ProductSchema extends BaseSchema {
   /**
    * Add aggregate rating
    *
-   * @param ratingValue - Rating value (e.g., 4.5)
-   * @param reviewCount - Number of reviews
+   * @param ratingOrData - Rating value (number) or a complete AggregateRating object
+   * @param reviewCount - Number of reviews (required when first arg is a number)
    * @param bestRating - Best possible rating (default: 5)
    * @param worstRating - Worst possible rating (default: 1)
    * @returns This instance for chaining
    */
   setAggregateRating(
-    ratingValue: number,
-    reviewCount: number,
+    ratingOrData: number | JsonLdData,
+    reviewCount?: number,
     bestRating: number = 5,
     worstRating: number = 1
   ): this {
+    if (typeof ratingOrData === 'object') {
+      return this.setProperty('aggregateRating', ratingOrData);
+    }
     return this.setProperty('aggregateRating', {
       '@type': 'AggregateRating',
-      ratingValue,
+      ratingValue: ratingOrData,
       reviewCount,
       bestRating,
       worstRating,

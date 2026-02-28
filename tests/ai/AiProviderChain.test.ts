@@ -10,7 +10,8 @@ class MockProvider implements IAiProvider {
   constructor(
     public name: string,
     private shouldFail: boolean = false,
-    private delay: number = 0
+    private delay: number = 0,
+    private isUnavailable: boolean = false
   ) {}
 
   async generate(): Promise<AiGenerationResponse> {
@@ -30,7 +31,7 @@ class MockProvider implements IAiProvider {
   }
 
   async isAvailable(): Promise<boolean> {
-    return true; // Always available, shouldFail only affects generate()
+    return !this.isUnavailable;
   }
 
   getModelName(): string {
@@ -229,30 +230,30 @@ describe('AiProviderChain', () => {
   });
 
   describe('Provider Management', () => {
-    it('should add provider', () => {
+    it('should add provider', async () => {
       const chain = new AiProviderChain({
         providers: [new MockProvider('provider1')],
       });
 
       chain.addProvider(new MockProvider('provider2'));
 
-      const available = chain.getAvailableProviders();
+      const available = await chain.getAvailableProviders();
       expect(available).toContain('provider1');
       expect(available).toContain('provider2');
     });
 
-    it('should add provider at specific priority', () => {
+    it('should add provider at specific priority', async () => {
       const chain = new AiProviderChain({
         providers: [new MockProvider('provider1'), new MockProvider('provider2')],
       });
 
       chain.addProvider(new MockProvider('provider3'), 0);
 
-      const available = chain.getAvailableProviders();
+      const available = await chain.getAvailableProviders();
       expect(available[0]).toBe('provider3');
     });
 
-    it('should remove provider', () => {
+    it('should remove provider', async () => {
       const chain = new AiProviderChain({
         providers: [new MockProvider('provider1'), new MockProvider('provider2')],
       });
@@ -260,7 +261,7 @@ describe('AiProviderChain', () => {
       const removed = chain.removeProvider('provider1');
 
       expect(removed).toBe(true);
-      expect(chain.getAvailableProviders()).not.toContain('provider1');
+      expect(await chain.getAvailableProviders()).not.toContain('provider1');
     });
 
     it('should get provider by name', () => {
@@ -272,7 +273,7 @@ describe('AiProviderChain', () => {
       expect(retrieved).toBe(provider1);
     });
 
-    it('should set provider priority', () => {
+    it('should set provider priority', async () => {
       const chain = new AiProviderChain({
         providers: [
           new MockProvider('provider1'),
@@ -283,7 +284,7 @@ describe('AiProviderChain', () => {
 
       chain.setProviderPriority('provider3', 0);
 
-      const available = chain.getAvailableProviders();
+      const available = await chain.getAvailableProviders();
       expect(available[0]).toBe('provider3');
     });
   });
@@ -303,23 +304,26 @@ describe('AiProviderChain', () => {
     });
 
     it('should throw when no providers available', async () => {
-      const providers = [new MockProvider('provider1', true), new MockProvider('provider2', true)];
+      const providers = [
+        new MockProvider('provider1', false, 0, true),
+        new MockProvider('provider2', false, 0, true),
+      ];
 
       const chain = new AiProviderChain({ providers });
 
       await expect(chain.generate('test prompt')).rejects.toThrow('No available AI providers');
     });
 
-    it('should list available providers', () => {
+    it('should list available providers', async () => {
       const chain = new AiProviderChain({
         providers: [
           new MockProvider('provider1'),
-          new MockProvider('provider2', true),
+          new MockProvider('provider2', false, 0, true),
           new MockProvider('provider3'),
         ],
       });
 
-      const available = chain.getAvailableProviders();
+      const available = await chain.getAvailableProviders();
 
       expect(available).toContain('provider1');
       expect(available).not.toContain('provider2');

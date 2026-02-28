@@ -98,7 +98,7 @@ export class AnthropicProvider extends BaseAiProvider {
     this.config = config;
 
     // Only enable mock mode if explicitly requested or if Anthropic SDK is not available
-    this.mockMode = config.mockMode === true || !Anthropic;
+    this.mockMode = config.mockMode === true || config.mock === true || (config.mockMode !== false && config.mock !== false && !Anthropic);
 
     // Initialize Anthropic client if not in mock mode
     if (!this.mockMode && Anthropic && config.apiKey) {
@@ -117,7 +117,7 @@ export class AnthropicProvider extends BaseAiProvider {
    * Updated to Claude 4 Sonnet (2025) - balanced performance and cost
    * Alternatives: claude-4-opus-20250101 (most capable), claude-4-haiku-20250101 (fastest)
    */
-  protected getModelName(): string {
+  public getModelName(): string {
     return this.config.model ?? 'claude-4-sonnet-20250101';
   }
 

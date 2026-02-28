@@ -122,6 +122,9 @@ export interface IAiProvider {
   /** Custom generation with prompt */
   generate(request: AiGenerationRequest): Promise<AiGenerationResponse>;
 
+  /** Get the model name */
+  getModelName(): string;
+
   /** Get provider status */
   getStatus(): Promise<{
     available: boolean;
@@ -153,6 +156,8 @@ export interface OpenAiConfig {
   maxRetries?: number;
   /** Use mock mode for testing (no real API calls) */
   mockMode?: boolean;
+  /** Alias for mockMode */
+  mock?: boolean;
 }
 
 /**
@@ -169,6 +174,8 @@ export interface AnthropicConfig {
   maxRetries?: number;
   /** Use mock mode for testing (no real API calls) */
   mockMode?: boolean;
+  /** Alias for mockMode */
+  mock?: boolean;
 }
 
 /**
@@ -185,6 +192,8 @@ export interface GoogleAiConfig {
   maxRetries?: number;
   /** Use mock mode for testing (no real API calls) */
   mockMode?: boolean;
+  /** Alias for mockMode */
+  mock?: boolean;
 }
 
 /**
@@ -203,6 +212,8 @@ export interface XAiConfig {
   maxRetries?: number;
   /** Use mock mode for testing (no real API calls) */
   mockMode?: boolean;
+  /** Alias for mockMode */
+  mock?: boolean;
 }
 
 /**
@@ -223,6 +234,8 @@ export interface OllamaConfig {
   headers?: Record<string, string>;
   /** Use mock mode for testing (no real API calls) */
   mockMode?: boolean;
+  /** Alias for mockMode */
+  mock?: boolean;
 }
 
 /**

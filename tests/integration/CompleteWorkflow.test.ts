@@ -31,7 +31,8 @@ describe('Complete SEO Workflow Integration', () => {
         </article>
       `;
 
-      const result = seoManager.analyze(blogPost).generateAll();
+      seoManager.analyze(blogPost);
+      const result = seoManager.generateAll();
 
       expect(result.title).toBeDefined();
       expect(result.description).toBeDefined();
@@ -97,7 +98,8 @@ describe('Complete SEO Workflow Integration', () => {
         </main>
       `;
 
-      const result = seoManager.analyze(productPage).generateAll();
+      seoManager.analyze(productPage);
+      const result = seoManager.generateAll();
 
       expect(result.title).toBeDefined();
       expect(result.description).toBeDefined();
@@ -190,7 +192,8 @@ describe('Complete SEO Workflow Integration', () => {
       const content = '<h1>Test Page</h1><p>Content for caching test</p>';
 
       // First analysis
-      const result1 = seoManager.analyze(content).generateAll();
+      seoManager.analyze(content);
+      const result1 = seoManager.generateAll();
 
       // Cache the result
       await cache.set('test-page', result1);
@@ -222,7 +225,8 @@ describe('Complete SEO Workflow Integration', () => {
 
       const content = '<h1>AI Test</h1><p>Content for AI generation</p>';
 
-      const analysis = seoManager.analyze(content).getAnalysis();
+      seoManager.analyze(content);
+      const analysis = seoManager.getAnalysis();
 
       expect(analysis).toBeDefined();
       expect(analysis!.keywords).toBeDefined();
@@ -297,7 +301,9 @@ describe('Complete SEO Workflow Integration', () => {
       const content = '<h1>Fluent Test</h1><p>Testing method chaining</p>';
 
       // Chain analyze and generate
-      const result = seoManager.updateConfig({ mode: 'fast' }).analyze(content).generateAll();
+      seoManager.updateConfig({ mode: 'fast' });
+      seoManager.analyze(content);
+      const result = seoManager.generateAll();
 
       expect(result.title).toBeDefined();
       expect(result.description).toBeDefined();

@@ -75,13 +75,13 @@ export class OllamaProvider extends BaseAiProvider {
       ...config,
       apiUrl: config.apiUrl ?? config.baseUrl ?? 'http://localhost:11434',
     };
-    this.mockMode = config.mockMode === true;
+    this.mockMode = config.mockMode === true || config.mock === true;
   }
 
   /**
    * Get the model name for this provider
    */
-  protected getModelName(): string {
+  public getModelName(): string {
     return this.config.model;
   }
 
