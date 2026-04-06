@@ -115,8 +115,8 @@
     "next": "^16.0.0",
     "prettier": "^3.2.5",
     "rimraf": "^6.0.1",
-    "ts-jest": "^29.1.2",
-    "typescript": "^5.3.3"
+    "ts-jest": "^29.4.9",
+    "typescript": "^6.0.2"
   },
   "peerDependencies": {
     "@anthropic-ai/sdk": "^0.20.0",

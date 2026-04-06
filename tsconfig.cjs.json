@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "rootDir": "./src",
     "module": "CommonJS",
     "moduleResolution": "node",
     "target": "ES2020",

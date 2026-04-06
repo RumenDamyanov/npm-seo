@@ -4,6 +4,7 @@
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "allowJs": false,
     "declaration": true,
     "declarationMap": true,
