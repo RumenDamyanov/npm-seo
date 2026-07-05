@@ -57,7 +57,7 @@ export abstract class BaseSchema {
     return {
       ...this.data,
       '@type': this.getType(),
-    } as JsonLdData;
+    };
   }
 
   /**

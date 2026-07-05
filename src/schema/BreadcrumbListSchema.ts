@@ -104,7 +104,7 @@ export class BreadcrumbListSchema extends BaseSchema {
       '@context': 'https://schema.org',
       '@type': this.getType(),
       itemListElement,
-    } as JsonLdData;
+    };
   }
 
   /**
