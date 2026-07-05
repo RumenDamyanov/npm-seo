@@ -218,7 +218,7 @@ export class ProductSchema extends BaseSchema {
           '@type': 'Rating',
           ratingValue: review.ratingValue,
         },
-      } as JsonLdData);
+      });
     }
 
     return this.setProperty('review', reviews);

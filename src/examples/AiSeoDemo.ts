@@ -4,7 +4,7 @@
 
 import { AiSeoAnalyzer } from '../ai/AiSeoAnalyzer';
 import type { ContentAnalysis } from '../types/ContentTypes';
-import type { SeoResult, SeoMode } from '../types/SeoTypes';
+import type { SeoResult } from '../types/SeoTypes';
 
 // Mock data for testing
 const mockContentAnalysis: ContentAnalysis = {
@@ -90,7 +90,7 @@ const mockSeoResult: SeoResult = {
   jsonLd: [],
   meta: {
     generatedAt: new Date(),
-    mode: 'ai' as SeoMode,
+    mode: 'ai',
     processingTime: 100,
     fromCache: false,
   },
