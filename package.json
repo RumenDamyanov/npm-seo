@@ -94,7 +94,7 @@
   },
   "dependencies": {
     "jsdom": "^29.0.1",
-    "node-html-parser": "^8.0.3",
+    "node-html-parser": "^9.0.0",
     "sanitize-html": "^2.17.0"
   },
   "devDependencies": {
