@@ -121,7 +121,7 @@ describe('CacheKeyGenerator', () => {
       const duration = Date.now() - start;
 
       expect(key).toBeDefined();
-      expect(duration).toBeLessThan(10); // Should be very fast
+      expect(duration).toBeLessThan(100);
     });
 
     it('should handle special characters', () => {

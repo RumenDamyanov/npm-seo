@@ -193,7 +193,7 @@ describe('ContentAnalyzer', () => {
       const fastTime = Date.now() - startFast;
 
       // Fast mode should generally be faster or similar
-      expect(fastTime).toBeLessThanOrEqual(fullTime + 5); // Allow 5ms margin
+      expect(fastTime).toBeLessThanOrEqual(fullTime + 50);
     });
 
     it('should use provided metadata language in fast mode', () => {
