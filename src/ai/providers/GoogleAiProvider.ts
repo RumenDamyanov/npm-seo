@@ -1,4 +1,5 @@
 import { BaseAiProvider } from '../BaseAiProvider';
+import { resolveModelName } from '../modelName';
 import type {
   AiGenerationRequest,
   AiGenerationResponse,
@@ -53,7 +54,7 @@ try {
  * // Real API mode
  * const provider = new GoogleAiProvider({
  *   apiKey: process.env.GOOGLE_AI_API_KEY,
- *   model: 'gemini-1.5-pro-latest',
+ *   model: 'gemini-3.5-flash-lite',
  * });
  *
  * // Mock mode (for testing)
@@ -105,10 +106,10 @@ export class GoogleAiProvider extends BaseAiProvider {
   /**
    * Get the model name for this provider
    * Updated to Gemini 1.5 Pro (latest stable) - massive context window
-   * Alternatives: gemini-1.5-flash (faster), gemini-2.0-flash-exp (experimental)
+   * Alternatives: gemini-3.8-flash
    */
   public getModelName(): string {
-    return this.config.model ?? 'gemini-1.5-pro-latest';
+    return resolveModelName(this.config.model, 'gemini-3.5-flash-lite');
   }
 
   /**

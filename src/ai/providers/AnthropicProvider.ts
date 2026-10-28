@@ -1,4 +1,5 @@
 import { BaseAiProvider } from '../BaseAiProvider';
+import { resolveModelName } from '../modelName';
 import type {
   AiGenerationRequest,
   AiGenerationResponse,
@@ -63,7 +64,7 @@ try {
  * // Real API mode
  * const provider = new AnthropicProvider({
  *   apiKey: process.env.ANTHROPIC_API_KEY,
- *   model: 'claude-4-sonnet-20250101',
+ *   model: 'claude-haiku-4-5',
  * });
  *
  * // Mock mode (for testing)
@@ -118,10 +119,10 @@ export class AnthropicProvider extends BaseAiProvider {
   /**
    * Get the model name for this provider
    * Updated to Claude 4 Sonnet (2025) - balanced performance and cost
-   * Alternatives: claude-4-opus-20250101 (most capable), claude-4-haiku-20250101 (fastest)
+   * Alternatives: claude-sonnet-5, claude-opus-5
    */
   public getModelName(): string {
-    return this.config.model ?? 'claude-4-sonnet-20250101';
+    return resolveModelName(this.config.model, 'claude-haiku-4-5');
   }
 
   /**

@@ -7,8 +7,20 @@ module.exports = {
     '<rootDir>/tests/integrations/frameworks.test.ts', // Temporarily disabled due to Jest worker issues with framework mocking
   ],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.jest.json' }],
+    '^.+\\.js$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          allowJs: true,
+          esModuleInterop: true,
+          module: 'commonjs',
+          isolatedModules: true,
+        },
+      },
+    ],
   },
+  transformIgnorePatterns: ['^(?!.*node_modules/sanitize-html/).*node_modules.*'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!tests/**/*'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],

@@ -38,17 +38,17 @@ npm install @rumenx/seo
 For AI-powered content generation, install your preferred provider:
 
 ```bash
-# OpenAI (GPT-4.1, GPT-4.1-turbo)
+# OpenAI (gpt-5.4-mini by default, also gpt-5.4)
 npm install openai
 
-# Anthropic (Claude 4)
+# Anthropic (claude-haiku-4-5 by default, also claude-sonnet-5 and claude-opus-5)
 npm install @anthropic-ai/sdk
 
-# Google AI (Gemini 1.5 Pro, Gemini 2.0)
+# Google AI (gemini-3.5-flash-lite by default, also gemini-3.8-flash)
 npm install @google/generative-ai
 
-# xAI (Grok-2, Grok-2-mini)
-npm install @xai-sdk/client  # Coming soon
+# xAI (grok-4.6 by default). XAiProvider uses the OpenAI SDK against https://api.x.ai/v1
+npm install openai
 
 # Ollama (Local models: Llama 3.3, Qwen 2.5, etc.)
 npm install ollama
@@ -59,7 +59,7 @@ npm install redis
 
 ### Requirements
 
-- **Node.js**: 18.x or higher
+- **Node.js**: 22.23.4+, 24.22.1+, or 26.12.1+. Node.js 18 and 20 are end of life and have no fix for [Node2Shell](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases) (CVE-2026-111497).
 - **TypeScript**: 4.7 or higher (for TypeScript projects)
 
 ## 🚀 Quick Start
@@ -648,7 +648,6 @@ Check out our other Node.js tools that work great with `@rumenx/seo`:
 ### Other Languages
 
 - **[php-seo](https://github.com/RumenDamyanov/php-seo)** - SEO analysis and optimization library for PHP
-- **[go-seo](https://github.com/RumenDamyanov/go-seo)** _(Planned)_ - SEO analysis and optimization library for Go
 
 These tools complement each other to provide a complete content management and SEO solution for modern web applications.
 

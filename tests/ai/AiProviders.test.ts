@@ -17,7 +17,7 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(await provider.isAvailable()).toBe(true);
       expect(provider.name).toBe('openai');
-      expect(provider.getModelName()).toBe('gpt-4.1-turbo');
+      expect(provider.getModelName()).toBe('gpt-5.4-mini');
     });
 
     it('should generate mock responses', async () => {
@@ -49,6 +49,15 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(provider.getModelName()).toBe('gpt-4o-mini');
     });
+
+    it('should reject a model name that could change a request path', () => {
+      const provider = new OpenAiProvider({
+        mock: true,
+        model: '../other',
+      });
+
+      expect(() => provider.getModelName()).toThrow(/not allowed/);
+    });
   });
 
   describe('AnthropicProvider', () => {
@@ -57,7 +66,7 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(await provider.isAvailable()).toBe(true);
       expect(provider.name).toBe('anthropic');
-      expect(provider.getModelName()).toBe('claude-4-sonnet-20250101');
+      expect(provider.getModelName()).toBe('claude-haiku-4-5');
     });
 
     it('should generate mock responses', async () => {
@@ -95,7 +104,7 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(await provider.isAvailable()).toBe(true);
       expect(provider.name).toBe('google');
-      expect(provider.getModelName()).toBe('gemini-1.5-pro-latest');
+      expect(provider.getModelName()).toBe('gemini-3.5-flash-lite');
     });
 
     it('should generate mock responses', async () => {
@@ -133,7 +142,7 @@ describe('AI Providers - Mock Mode', () => {
 
       expect(await provider.isAvailable()).toBe(true);
       expect(provider.name).toBe('xai');
-      expect(provider.getModelName()).toBe('grok-2-latest');
+      expect(provider.getModelName()).toBe('grok-4.6');
     });
 
     it('should generate mock responses', async () => {

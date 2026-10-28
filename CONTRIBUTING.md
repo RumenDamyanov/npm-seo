@@ -6,7 +6,7 @@ Thank you for your interest in contributing to @rumenx/seo! This document provid
 
 ### Prerequisites
 
-- Node.js 18.x or higher
+- Node.js 22.23.4+, 24.22.1+, or 26.12.1+
 - npm or yarn package manager
 - Git
 
