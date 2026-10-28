@@ -12,13 +12,13 @@ A comprehensive TypeScript library for SEO analysis, content optimization, and m
 
 - 🔍 **Content Analysis**: Deep analysis of HTML content, structure, and SEO metrics
 - 🎯 **SEO Recommendations**: Automated suggestions for title, description, headings, and more
-- 🤖 **AI Integration**: Support for OpenAI GPT-4.1, Claude 4, Gemini 1.5 Pro, xAI Grok, and Ollama for content generation
+- 🤖 **AI Integration**: OpenAI `gpt-5.4-mini`, Anthropic `claude-haiku-4-5`, Google `gemini-3.5-flash-lite`, xAI `grok-4.6`, and Ollama. Older model ids still work when set explicitly.
 - 📊 **SEO Scoring**: Comprehensive scoring system with detailed breakdowns
 - ⚡ **Fast Mode**: Optimized analysis for performance-critical applications
 - 🏗️ **Framework Ready**: Built-in adapters for Express, Next.js, and Fastify
 - 📝 **TypeScript**: Full type safety with extensive type definitions
 - 🌐 **Dual Module**: Both ESM and CommonJS support
-- 🚀 **Zero Dependencies**: Core functionality works without external dependencies
+- 🚀 **Optional AI SDKs**: Analysis ships with its HTML parsers. OpenAI, Anthropic, Google, and Ollama clients are installed only when you use them.
 - 🔒 **Security First**: Secure HTML parsing and content analysis
 - 📦 **Batch Processing**: Analyze multiple documents efficiently
 - 💾 **Caching System**: Memory and Redis cache support for performance
