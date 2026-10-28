@@ -85,7 +85,9 @@ export abstract class BaseSchema {
    * @returns HTML script tag with JSON-LD
    */
   toScriptTag(): string {
-    return `<script type="application/ld+json">\n${this.toString()}\n</script>`;
+    const json = this.toString().replace(/</g, '\\u003c');
+
+    return `<script type="application/ld+json">\n${json}\n</script>`;
   }
 
   /**

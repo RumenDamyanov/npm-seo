@@ -83,6 +83,15 @@ describe('ArticleSchema', () => {
     expect(jsonString).toContain('"headline"');
     expect(() => JSON.parse(jsonString)).not.toThrow();
   });
+
+  it('should keep a closing script tag inside JSON-LD', () => {
+    const article = new ArticleSchema().setHeadline('Hello </script><script>alert(1)</script>');
+    const tag = article.toScriptTag();
+
+    expect(tag).not.toContain('</script><script>');
+    expect(tag).toContain('\\u003c/script>');
+    expect(tag.endsWith('</script>')).toBe(true);
+  });
 });
 
 describe('BreadcrumbListSchema', () => {

@@ -148,7 +148,7 @@ export interface OpenAiConfig {
   organization?: string;
   /** Base URL for API */
   baseUrl?: string;
-  /** Model to use (default: gpt-4.1-turbo) */
+  /** Model to use (default: gpt-5.4-mini) */
   model?: string;
   /** Request timeout in milliseconds */
   timeout?: number;
@@ -166,7 +166,7 @@ export interface OpenAiConfig {
 export interface AnthropicConfig {
   /** Anthropic API key */
   apiKey: string;
-  /** Model to use (default: claude-4-sonnet-20250101) */
+  /** Model to use (default: claude-haiku-4-5) */
   model?: string;
   /** Request timeout in milliseconds */
   timeout?: number;
@@ -184,7 +184,7 @@ export interface AnthropicConfig {
 export interface GoogleAiConfig {
   /** Google AI API key */
   apiKey: string;
-  /** Model to use (default: gemini-1.5-pro-latest) */
+  /** Model to use (default: gemini-3.5-flash-lite) */
   model?: string;
   /** Request timeout in milliseconds */
   timeout?: number;
@@ -204,7 +204,7 @@ export interface XAiConfig {
   apiKey: string;
   /** Base URL for xAI API (default: https://api.x.ai/v1) */
   baseUrl?: string;
-  /** Model to use (default: grok-2-latest) */
+  /** Model to use (default: grok-4.6) */
   model?: string;
   /** Request timeout in milliseconds */
   timeout?: number;
@@ -259,6 +259,10 @@ export interface AiProviderFactoryConfig {
     | {
         provider: 'ollama';
         config: OllamaConfig;
+      }
+    | {
+        provider: 'xai';
+        config: XAiConfig;
       };
 
   /** Fallback providers */
@@ -278,6 +282,10 @@ export interface AiProviderFactoryConfig {
     | {
         provider: 'ollama';
         config: OllamaConfig;
+      }
+    | {
+        provider: 'xai';
+        config: XAiConfig;
       }
   >;
 

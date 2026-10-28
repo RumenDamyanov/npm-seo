@@ -1,4 +1,5 @@
 import { BaseAiProvider } from '../BaseAiProvider';
+import { resolveModelName } from '../modelName';
 import type {
   AiGenerationRequest,
   AiGenerationResponse,
@@ -82,7 +83,7 @@ export class OllamaProvider extends BaseAiProvider {
    * Get the model name for this provider
    */
   public getModelName(): string {
-    return this.config.model;
+    return resolveModelName(this.config.model, this.config.model);
   }
 
   /**

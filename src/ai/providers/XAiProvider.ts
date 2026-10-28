@@ -1,4 +1,5 @@
 import { BaseAiProvider } from '../BaseAiProvider';
+import { resolveModelName } from '../modelName';
 import type {
   AiGenerationRequest,
   AiGenerationResponse,
@@ -69,7 +70,7 @@ try {
  * // Real API mode
  * const provider = new XAiProvider({
  *   apiKey: process.env.XAI_API_KEY,
- *   model: 'grok-2-latest',
+ *   model: 'grok-4.6',
  * });
  *
  * // Mock mode (for testing)
@@ -124,10 +125,10 @@ export class XAiProvider extends BaseAiProvider {
   /**
    * Get the model name for this provider
    * Default to Grok-2 (latest stable model)
-   * Alternatives: grok-2-mini (faster, cheaper)
+   * Alternatives: grok-4.7, grok-4.5, or an older id such as grok-2-latest
    */
   public getModelName(): string {
-    return this.config.model ?? 'grok-2-latest';
+    return resolveModelName(this.config.model, 'grok-4.6');
   }
 
   /**

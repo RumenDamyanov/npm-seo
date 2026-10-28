@@ -1,4 +1,5 @@
 import { BaseAiProvider } from '../BaseAiProvider';
+import { resolveModelName } from '../modelName';
 import type {
   AiGenerationRequest,
   AiGenerationResponse,
@@ -67,7 +68,7 @@ try {
  * // Real API mode
  * const provider = new OpenAiProvider({
  *   apiKey: process.env.OPENAI_API_KEY,
- *   model: 'gpt-4.1-turbo',
+ *   model: 'gpt-5.4-mini',
  * });
  *
  * // Mock mode (for testing)
@@ -122,10 +123,10 @@ export class OpenAiProvider extends BaseAiProvider {
   /**
    * Get the model name for this provider
    * Updated to GPT-4.1 Turbo (2025) - best balance of performance and cost
-   * Alternatives: gpt-4.1 (standard), gpt-4o-mini (cost-effective)
+   * Alternatives: gpt-5.4, or an older id such as gpt-4o-mini when set explicitly
    */
   public getModelName(): string {
-    return this.config.model ?? 'gpt-4.1-turbo';
+    return resolveModelName(this.config.model, 'gpt-5.4-mini');
   }
 
   /**

@@ -9,6 +9,7 @@ import { OpenAiProvider } from './providers/OpenAiProvider';
 import { AnthropicProvider } from './providers/AnthropicProvider';
 import { GoogleAiProvider } from './providers/GoogleAiProvider';
 import { OllamaProvider } from './providers/OllamaProvider';
+import { XAiProvider } from './providers/XAiProvider';
 
 /**
  * AI provider factory with fallback support
@@ -40,6 +41,8 @@ export class AiProviderFactory {
         return new GoogleAiProvider(providerConfig.config);
       case 'ollama':
         return new OllamaProvider(providerConfig.config);
+      case 'xai':
+        return new XAiProvider(providerConfig.config);
       default:
         throw new Error('Unsupported provider configuration');
     }
