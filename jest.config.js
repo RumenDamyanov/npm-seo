@@ -20,7 +20,9 @@ module.exports = {
       },
     ],
   },
-  transformIgnorePatterns: ['^(?!.*node_modules/sanitize-html/).*node_modules.*'],
+  transformIgnorePatterns: [
+    'node_modules/(?!.*(htmlparser2|entities|domhandler|domelementtype|domutils|dom-serializer)/)',
+  ],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!tests/**/*'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
