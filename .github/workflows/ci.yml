@@ -70,8 +70,8 @@ jobs:
     - name: Build package
       run: npm run build
 
-    - name: Test package installation
-      run: npm pack --dry-run
+    - name: Load the packed package
+      run: node scripts/smoke-load.mjs
 
   quality:
     runs-on: ubuntu-latest
