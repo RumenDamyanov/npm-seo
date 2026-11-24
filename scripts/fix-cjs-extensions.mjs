@@ -1,81 +1,69 @@
 #!/usr/bin/env node
 
 /**
- * Fix CommonJS extensions after TypeScript compilation
- * This script ensures proper .js extensions are used in require() statements
+ * After tsc, relative imports still omit file extensions, and directory
+ * barrels such as `./schema` were rewritten to `./schema.js`. Node cannot
+ * load either form. Point each specifier at the real file, and mark the
+ * ESM and CommonJS trees with their own package.json type.
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+const dist = path.join(root, 'dist');
 
-function processDirectory(dir) {
-  const files = fs.readdirSync(dir);
-  
-  for (const file of files) {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
-    
-    if (stat.isDirectory()) {
-      processDirectory(filePath);
-    } else if (file.endsWith('.js')) {
-      processFile(filePath);
+rewriteRelativeSpecifiers(path.join(dist, 'esm'), ['.js', '.d.ts']);
+rewriteRelativeSpecifiers(path.join(dist, 'cjs'), ['.js']);
+rewriteRelativeSpecifiers(path.join(dist, 'types'), ['.d.ts']);
+
+fs.writeFileSync(
+  path.join(dist, 'esm', 'package.json'),
+  `${JSON.stringify({ type: 'module' }, null, 2)}\n`
+);
+fs.writeFileSync(
+  path.join(dist, 'cjs', 'package.json'),
+  `${JSON.stringify({ type: 'commonjs' }, null, 2)}\n`
+);
+
+console.log('Fixed relative specifiers in dist.');
+
+function rewriteRelativeSpecifiers(directory, extensions) {
+  if (!fs.existsSync(directory)) {
+    console.log(`Skipping missing directory ${directory}`);
+    return;
+  }
+
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const filePath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      rewriteRelativeSpecifiers(filePath, extensions);
+      continue;
     }
+    if (!extensions.some(extension => entry.name.endsWith(extension))) {
+      continue;
+    }
+
+    const updated = fs
+      .readFileSync(filePath, 'utf8')
+      .replace(
+        /(\bfrom\s+|\bimport\s*\(\s*|\brequire\s*\(\s*)(['"])(\.\.?\/[^'"]+)\2/g,
+        (match, prefix, quote, specifier) => {
+          if (path.extname(specifier)) {
+            return match;
+          }
+          return `${prefix}${quote}${resolveSpecifier(filePath, specifier)}${quote}`;
+        }
+      );
+    fs.writeFileSync(filePath, updated);
   }
 }
 
-function processFile(filePath) {
-  let content = fs.readFileSync(filePath, 'utf8');
-  let modified = false;
-  
-  // Fix require statements to include .js extension
-  content = content.replace(
-    /require\(["'](\.[^"']*?)["']\)/g,
-    (match, modulePath) => {
-      if (!modulePath.endsWith('.js') && !modulePath.includes('..')) {
-        modified = true;
-        return `require("${modulePath}.js")`;
-      }
-      return match;
-    }
-  );
-  
-  // Fix export/import statements for relative paths
-  content = content.replace(
-    /(from|import)\s+["'](\.[^"']*?)["']/g,
-    (match, keyword, modulePath) => {
-      if (!modulePath.endsWith('.js') && !modulePath.includes('..')) {
-        modified = true;
-        return `${keyword} "${modulePath}.js"`;
-      }
-      return match;
-    }
-  );
-  
-  if (modified) {
-    fs.writeFileSync(filePath, content);
-    console.log(`Fixed extensions in: ${filePath}`);
+function resolveSpecifier(fromFile, specifier) {
+  const target = path.resolve(path.dirname(fromFile), specifier);
+  if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
+    return `${specifier}/index.js`;
   }
-}
-
-const cjsDir = path.join(__dirname, '..', 'dist', 'cjs');
-const esmDir = path.join(__dirname, '..', 'dist', 'esm');
-
-if (fs.existsSync(cjsDir)) {
-  console.log('Fixing CommonJS extensions...');
-  processDirectory(cjsDir);
-  console.log('CommonJS extensions fixed.');
-} else {
-  console.log('CommonJS dist directory not found, skipping...');
-}
-
-if (fs.existsSync(esmDir)) {
-  console.log('Fixing ESM extensions...');
-  processDirectory(esmDir);
-  console.log('ESM extensions fixed.');
-} else {
-  console.log('ESM dist directory not found, skipping...');
+  return `${specifier}.js`;
 }
